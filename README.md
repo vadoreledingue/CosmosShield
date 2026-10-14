@@ -1,45 +1,49 @@
-# Cosmos Discipline Shield — Android Edition
+# Cosmos Shield — application Android
 
-**PWA installable** pour la discipline numérique sur Android. Zéro code natif, zéro ADB — tout passe par les permissions système accessibles en un clic.
+Application Android (Kotlin) qui embarque ton interface HTML et ajoute les vraies fonctions système :
+temps d'écran réel, interception des apps (sas de respiration), noir & blanc, notifications 21h30 / 8h.
+Aucune dépendance externe, aucun accès Internet : tout fonctionne hors ligne.
 
-## Fonctionnalités
+## Obtenir l'APK
 
-| Onglet            | Description                                                                                                                                  |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Aujourd'hui**   | Temps d'écran auto (Usage Stats), habitudes avec streaks, compteurs d'abstinence (jours/heures/minutes temps réel), limite d'écran ajustable |
-| **Grilles Mois**  | _Verte_ : taux de réussite habitudes par jour (gradient vert) • _Rouge_ : rechutes & dépassements écran (gradient rouge)                     |
-| **Bouclier Apps** | Sélection d'apps → à l'ouverture : **Grayscale auto** + **Breath Gate** (6s respiration guidée) → choix durée 1–5 min → re-pop automatique   |
-| **Réglages**      | Liens directs vers permissions Android : Données d'utilisation, Affichage par-dessus, Notifications (couvre-feu 21h30 + bilan matin)         |
+**Option A — Android Studio** (le plus simple)
+1. Installe Android Studio, puis `File > Open` et choisis le dossier `CosmosShield`.
+2. Attends la synchronisation Gradle (JDK 17 inclus dans Android Studio).
+3. Branche ton téléphone (débogage USB) et clique ▶ **Run**, ou `Build > Build APK(s)`.
 
-## Flux principal
+**Option B — sans rien installer (GitHub)**
+1. Crée un dépôt GitHub et envoie-y ce dossier.
+2. Onglet **Actions > Build APK** : télécharge l'artefact `CosmosShield-apk` (fichier `app-release.apk`).
+3. Copie l'APK sur le téléphone et installe-le (autorise « sources inconnues »).
 
-1. **Ouvre l'app** → active des presets (Lecture, Sport, Sommeil, No Porn, Limite écran) ou crée les tiens
-2. **Ajoute tes apps pièges** (Insta, TikTok, YouTube…) dans _Bouclier Apps_
-3. **Lance une app** depuis le bouclier → écran passe en N&B + 6s respiration → choisis 1–5 min → session démarre
-4. **Temps écoulé** → re-pop Breath Gate → tu décides de continuer ou fermer
-5. **Chaque matin** : bilan sommeil + validation veille → streaks & grilles mis à jour
+**Option C — ligne de commande** : `./gradlew assembleRelease` → `app/build/outputs/apk/release/`.
 
-## Installation
+## Premier lancement : permissions (onglet Réglages)
+1. **Données d'utilisation** — temps d'écran réel + détection de l'app ouverte
+2. **Affichage par-dessus les autres apps** — indispensable pour que le sas s'ouvre devant Instagram, etc.
+3. **Notifications** — couvre-feu 21h30 et bilan du matin 8h
+4. **Batterie sans limite** — évite que le constructeur (Xiaomi, Samsung, Huawei…) coupe le bouclier
 
-1. Ouvre `index.html` sur ton téléphone (Chrome / Firefox / Edge)
-2. Menu ⋮ → **Installer l'application** / **Ajouter à l'écran d'accueil**
-3. Lance l'icône → autorise les 3 permissions via les boutons _Réglages_
-4. C'est prêt — fonctionne 100% hors-ligne, données en `localStorage`
+Ensuite, onglet **Bouclier Apps** > « Choisir une application installée ».
 
-## Stack
+## Noir & blanc réel (optionnel, une seule fois)
+Android l'interdit aux apps sans autorisation spéciale. Depuis un PC, téléphone en débogage USB :
 
-- **HTML/CSS/JS** vanilla (un seul fichier)
-- **Tailwind CSS** via CDN
-- **Lucide Icons** via CDN
-- **PWA** : manifest dynamique, `standalone`, `viewport-fit=cover`
-- **Android Intents** : `USAGE_ACCESS_SETTINGS`, `MANAGE_OVERLAY_PERMISSION`
+    adb shell pm grant com.cosmos.shield android.permission.WRITE_SECURE_SETTINGS
 
-## Confidentialité
+Sans cela, le sas de respiration fonctionne quand même, mais l'écran reste en couleur.
+Bouton de secours dans Réglages : « Rétablir les couleurs ».
 
-- **Aucun serveur** — tout stocké localement (`localStorage`)
-- **Aucun tracking** — pas d'analytics, pas de compte
-- **Permissions** : seulement ce que tu acceptes dans les réglages système
+## Modifier l'interface
+L'UI est dans `web/index.html`. Après modification :
 
----
+    cd web && npm install && npm run build
 
-_Conçu pour être brutal, minimal, et efficace. Zéro friction, zéro excuse._
+(régénère `app/src/main/assets/www`, avec Tailwind, les icônes et les polices embarqués).
+
+## Structure
+- `web/` : source de l'interface (HTML + build Tailwind hors ligne)
+- `app/src/main/assets/www/` : interface compilée, servie dans la WebView
+- `NativeBridge.kt` : pont JavaScript ↔ Android
+- `ShieldService.kt` : surveillance de l'app au premier plan (service au premier plan)
+- `Usage.kt` : temps d'écran · `Grayscale.kt` : noir & blanc · `Reminders.kt` : alarmes et notifications

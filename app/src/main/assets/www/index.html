@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Cosmos Discipline — Android Edition</title>
+
+  <link rel="stylesheet" href="app.css" />
+  <script src="lucide.min.js"></script>
+
+  <style>
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('fonts/inter-latin-wght-normal.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 100 800; font-display: swap; src: url('fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2'); }
+    :root { color-scheme: dark; }
+    * { -webkit-tap-highlight-color: transparent; user-select: none; }
+    body { background-color: #000000; color: #f8fafc; font-family: 'Inter', sans-serif; overscroll-behavior-y: none; }
+    .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+
+    .galaxy-bg {
+      background-color: #000000;
+      background-image: 
+        radial-gradient(circle at 50% -10%, rgba(124, 58, 237, 0.25) 0%, transparent 55%),
+        radial-gradient(circle at 90% 35%, rgba(147, 51, 234, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 10% 80%, rgba(88, 28, 135, 0.18) 0%, transparent 50%);
+    }
+
+    .oled-card {
+      background: rgba(9, 7, 16, 0.9);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(139, 92, 246, 0.22);
+      box-shadow: 0 4px 25px -4px rgba(0, 0, 0, 0.9), 0 0 15px -5px rgba(139, 92, 246, 0.15);
+    }
+
+    .grayscale-active {
+      filter: grayscale(100%) contrast(1.08) !important;
+      transition: filter 0.4s ease;
+    }
+
+    @keyframes pulse-orb {
+      0%, 100% { transform: scale(0.7); opacity: 0.6; box-shadow: 0 0 25px rgba(139, 92, 246, 0.3); }
+      50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 75px rgba(168, 85, 247, 0.9); }
+    }
+    .breath-orb { transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    main-tab { display: block; }
+    input, textarea, select, .select-text { -webkit-user-select: text; user-select: text; }
+    button:disabled { pointer-events: none; }
+  </style>
+</head>
+<body class="galaxy-bg min-h-screen flex justify-center items-start overflow-x-hidden">
+
+  <div class="w-full max-w-md min-h-screen flex flex-col relative pb-24 border-x border-purple-950/30 bg-black/40">
+
+    <!-- EN-TÊTE FIXE -->
+    <header class="sticky top-0 z-30 bg-black/90 backdrop-blur-xl border-b border-purple-900/30 px-4 pt-3 pb-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 via-violet-700 to-fuchsia-900 flex items-center justify-center shadow-lg shadow-purple-700/30 border border-purple-400/30">
+            <i data-lucide="orbit" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base font-bold tracking-tight bg-gradient-to-r from-white via-purple-200 to-fuchsia-400 bg-clip-text text-transparent">
+                COSMOS SHIELD
+              </h1>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/50 font-mono-num">
+                ANDROID v2.0
+              </span>
+            </div>
+            <p id="live-system-date" class="text-[11px] text-slate-400 font-medium capitalize">
+              Chargement...
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button onclick="openMorningModal()" title="Bilan du matin" class="p-2 rounded-xl bg-purple-950/50 border border-purple-800/40 text-amber-300 active:scale-95 transition">
+            <i data-lucide="sun" class="w-4 h-4"></i>
+          </button>
+          <button onclick="openSettingsModal()" title="Réglages & Permissions" class="p-2 rounded-xl bg-purple-950/50 border border-purple-800/40 text-purple-300 active:scale-95 transition relative">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+            <span id="settings-dot" class="w-2 h-2 rounded-full bg-emerald-400 absolute top-1.5 right-1.5"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- BANNIÈRE DE SESSION ACTIVE (RE-POP APRES 1-5 MIN) -->
+      <div id="active-session-banner" class="hidden mt-2.5 p-2.5 rounded-xl bg-gradient-to-r from-purple-950/90 via-fuchsia-950/80 to-black border border-fuchsia-500/50 flex items-center justify-between animate-pulse">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-fuchsia-400 animate-ping"></span>
+          <div>
+            <p class="text-xs font-semibold text-white">Session : <span id="banner-app-name" class="text-fuchsia-300">App</span></p>
+            <p class="text-[10px] text-slate-300">Mode Grayscale & Sas actif</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="banner-countdown" class="font-mono-num text-sm font-bold text-fuchsia-300 bg-black/70 px-2 py-1 rounded-lg border border-fuchsia-500/30">03:00</span>
+          <button onclick="stopActiveSession()" class="text-[11px] px-2 py-1 rounded-lg bg-red-950/80 text-red-300 border border-red-700/50">Quitter</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENU DES ONGLETS -->
+    <main class="flex-1 px-4 pt-4 space-y-5">
+
+      <!-- ================= ONGLÈT 1 : AUJOURD'HUI ================= -->
+      <main-tab id="tab-today" class="space-y-5 block">
+
+        <!-- Carte Temps d'Écran Automatique -->
+        <div class="oled-card rounded-2xl p-4 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-[10px] uppercase tracking-wider text-purple-400 font-bold">Temps d'Écran Android (Auto)</span>
+              <div class="flex items-baseline gap-2 mt-0.5">
+                <span id="today-screentime" class="text-2xl font-extrabold font-mono-num text-white">0h 00m</span>
+                <span id="screentime-target-label" class="text-xs text-slate-400">/ Max 2.0h</span>
+              </div>
+            </div>
+            <button onclick="syncAndroidUsageStats()" class="px-3 py-1.5 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-200 text-xs font-semibold flex items-center gap-1.5 active:scale-95">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync
+            </button>
+          </div>
+          <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-purple-950">
+            <div id="screentime-bar" class="h-full bg-gradient-to-r from-emerald-500 via-purple-500 to-rose-500 transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <p id="screentime-status" class="text-[11px] text-slate-400 mt-2">Collecte automatique active en arrière-plan</p>
+        </div>
+
+        <!-- ÉTAT VIDE PAR DÉFAUT (0) -->
+        <div id="empty-state" class="oled-card rounded-2xl p-6 text-center space-y-4 border-dashed border-purple-700/40">
+          <div class="w-14 h-14 rounded-2xl bg-purple-950/80 border border-purple-600/40 mx-auto flex items-center justify-center text-purple-300">
+            <i data-lucide="sparkles" class="w-7 h-7"></i>
+          </div>
+          <div class="space-y-1">
+            <h2 class="text-base font-bold text-white">Tout est à zéro — Prêt à démarrer</h2>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Aucune habitude ni traqueur d'addiction n'est activé. Active tes presets ou crée tes propres objectifs.
+            </p>
+          </div>
+          <button onclick="openPresetsModal()" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-semibold text-sm shadow-lg active:scale-98 flex items-center justify-center gap-2">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> Activer des Presets ou Custom
+          </button>
+        </div>
+
+        <!-- LISTE HABITUDES -->
+        <div id="habits-wrapper" class="hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Habitudes du Jour</h2>
+            </div>
+            <button onclick="openPresetsModal()" class="text-xs text-purple-400">+ Gérer</button>
+          </div>
+          <div id="habits-container" class="space-y-2.5"></div>
+        </div>
+
+        <!-- LISTE DETOX & ADDICTIONS -->
+        <div id="detox-wrapper" class="hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              <h2 class="text-xs font-bold uppercase tracking-wider text-slate-300">Bouclier Detox & Addictions</h2>
+            </div>
+          </div>
+          <div id="detox-container" class="space-y-3"></div>
+        </div>
+
+      </main-tab>
+
+      <!-- ================= ONGLÈT 2 : GRILLES MOIS ================= -->
+      <main-tab id="tab-grids" class="hidden space-y-5">
+        <div class="oled-card rounded-2xl p-3.5 flex items-center justify-between">
+          <button onclick="changeMonth(-1)" class="p-2 rounded-xl bg-purple-950/50 text-purple-300"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+          <div class="text-center">
+            <h3 id="grid-month-title" class="text-sm font-bold text-white capitalize">Octobre 2026</h3>
+            <p class="text-[10px] text-slate-400">Synchronisé sur le téléphone</p>
+          </div>
+          <button onclick="changeMonth(1)" class="p-2 rounded-xl bg-purple-950/50 text-purple-300"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+        </div>
+
+        <!-- GRID MAP 1 : VERT (HABITUDES) -->
+        <div class="oled-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-1.5"><i data-lucide="flame" class="w-4 h-4"></i> Grid Map Habitudes</h3>
+              <p class="text-[11px] text-slate-400">Gradient vert selon les objectifs accomplis chaque jour.</p>
+            </div>
+            <span id="green-score" class="font-mono-num text-xs font-bold px-2 py-1 rounded-lg bg-emerald-950 text-emerald-300 border border-emerald-700/40">0%</span>
+          </div>
+          <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] text-slate-500 font-semibold pt-1">
+            <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+          </div>
+          <div id="green-grid" class="grid grid-cols-7 gap-1.5"></div>
+        </div>
+
+        <!-- GRID MAP 2 : ROUGE (DETOX & ÉCARTS) -->
+        <div class="oled-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-rose-400 flex items-center gap-1.5"><i data-lucide="shield-alert" class="w-4 h-4"></i> Grid Map Detox & Écarts</h3>
+              <p class="text-[11px] text-slate-400">Intensité rouge selon dépassement d'écran ou rechute.</p>
+            </div>
+            <span id="red-score" class="font-mono-num text-xs font-bold px-2 py-1 rounded-lg bg-rose-950 text-rose-300 border border-rose-700/40">0 écart</span>
+          </div>
+          <div class="grid grid-cols-7 gap-1.5 text-center text-[10px] text-slate-500 font-semibold pt-1">
+            <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+          </div>
+          <div id="red-grid" class="grid grid-cols-7 gap-1.5"></div>
+        </div>
+      </main-tab>
+
+      <!-- ================= ONGLÈT 3 : APP SHIELD ================= -->
+      <main-tab id="tab-shield" class="hidden space-y-4">
+        <div class="oled-card rounded-2xl p-4 space-y-2 border-purple-500/30">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="shield" class="w-4 h-4 text-purple-400"></i>
+            Protection & Sas d'Interception Android
+          </h2>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Choisis tes applications. À chaque ouverture : <strong class="text-slate-200">noir &amp; blanc</strong> + <strong class="text-purple-300">Breath Gate</strong> (respiration de 6s, puis durée de 1 à 5 min avant un nouveau sas).
+          </p>
+        </div>
+        <div id="shield-warning" class="hidden oled-card rounded-2xl p-3 border-amber-500/40 flex items-center justify-between gap-3">
+          <p class="text-[11px] text-amber-300 leading-snug">⚠️ Active l'accès aux données d'utilisation et l'affichage par-dessus les autres apps pour que le bouclier fonctionne.</p>
+          <button onclick="switchTab('settings')" class="px-3 py-1.5 rounded-xl bg-amber-500 text-black text-xs font-bold shrink-0">Réglages</button>
+        </div>
+        <div id="shield-apps-list" class="space-y-2.5"></div>
+        <div id="add-app-web" class="oled-card rounded-2xl p-3.5 flex gap-2">
+          <input id="new-app-name" type="text" placeholder="Ajouter une app (ex: Snapchat, Twitter...)" class="flex-1 bg-black/80 border border-purple-900/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none" />
+          <button onclick="addShieldApp()" class="px-3.5 py-2 rounded-xl bg-purple-600 text-white text-xs font-semibold">Ajouter</button>
+        </div>
+        <button id="add-app-native" onclick="openAppPicker()" class="hidden w-full py-3 rounded-2xl bg-purple-950/70 border border-purple-600/50 text-purple-200 text-sm font-semibold flex items-center justify-center gap-2 active:scale-98">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Choisir une application installée
+        </button>
+      </main-tab>
+
+      <!-- ================= ONGLÈT 4 : RÉGLAGES & PERMISSIONS ================= -->
+      <main-tab id="tab-settings" class="hidden space-y-4">
+        <div class="oled-card rounded-2xl p-4 space-y-4">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="smartphone" class="w-4 h-4 text-emerald-400"></i>
+            Permissions Android
+          </h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Active ces accès dans les réglages système (un seul clic chacun). Au retour dans l'app, le statut se met à jour tout seul.
+          </p>
+
+          <div class="space-y-2.5 text-xs">
+            <div class="p-3 rounded-2xl bg-black/80 border border-purple-900/50 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-bold text-white flex items-center gap-2 flex-wrap">1. Données d'utilisation <span id="perm-usage"></span></p>
+                <p class="text-[11px] text-slate-400">Lit le temps d'écran réel et détecte l'app ouverte.</p>
+              </div>
+              <button onclick="openAndroidSettings('usage')" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Ouvrir</button>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-black/80 border border-purple-900/50 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-bold text-white flex items-center gap-2 flex-wrap">2. Affichage par-dessus <span id="perm-overlay"></span></p>
+                <p class="text-[11px] text-slate-400">Permet d'afficher le sas de respiration devant l'app.</p>
+              </div>
+              <button onclick="openAndroidSettings('overlay')" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Ouvrir</button>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-black/80 border border-purple-900/50 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-bold text-white flex items-center gap-2 flex-wrap">3. Notifications <span id="perm-notif"></span></p>
+                <p class="text-[11px] text-slate-400">Couvre-feu à 21h30 et bilan du matin à 8h.</p>
+              </div>
+              <button onclick="requestAppNotifications()" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Activer</button>
+            </div>
+
+            <div class="p-3 rounded-2xl bg-black/80 border border-purple-900/50 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-bold text-white flex items-center gap-2 flex-wrap">4. Batterie sans limite <span id="perm-battery"></span></p>
+                <p class="text-[11px] text-slate-400">Empêche Android d'arrêter le bouclier en arrière-plan.</p>
+              </div>
+              <button onclick="openAndroidSettings('battery')" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Ouvrir</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="oled-card rounded-2xl p-4 space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 flex-wrap">
+            <i data-lucide="moon" class="w-4 h-4 text-purple-300"></i> Noir &amp; blanc réel <span id="perm-secure"></span>
+          </h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Android interdit aux apps de passer l'écran en niveaux de gris sans une autorisation spéciale. À faire <strong class="text-slate-200">une seule fois</strong> depuis un PC (débogage USB activé) :
+          </p>
+          <div class="p-2.5 rounded-xl bg-black border border-purple-900/50 font-mono-num text-[10px] text-emerald-300 select-text break-all">adb shell pm grant com.cosmos.shield android.permission.WRITE_SECURE_SETTINGS</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="copyAdb()" class="py-2.5 rounded-xl bg-purple-950/80 border border-purple-600/50 text-purple-200 text-xs font-semibold">Copier la commande</button>
+            <button onclick="restoreColors()" class="py-2.5 rounded-xl bg-black border border-slate-700 text-slate-200 text-xs font-semibold">Rétablir les couleurs</button>
+          </div>
+        </div>
+
+        <div class="oled-card rounded-2xl p-4 space-y-3 border-rose-900/40">
+          <h3 class="text-sm font-bold text-rose-400 flex items-center gap-2"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Réinitialisation Usine</h3>
+          <p class="text-xs text-slate-400">Remet tous les compteurs, habitudes et historiques à zéro (état initial vierge).</p>
+          <button onclick="factoryReset()" class="w-full py-2.5 rounded-xl bg-rose-950/70 border border-rose-700/50 text-rose-200 text-xs font-semibold">Remettre tout à zéro</button>
+        </div>
+      </main-tab>
+
+    </main>
+
+    <!-- BARRE DE NAVIGATION INFÉRIEURE -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 bg-black/95 backdrop-blur-xl border-t border-purple-900/40 px-2 py-2 flex justify-around items-center">
+      <button onclick="switchTab('today')" id="nav-today" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-purple-400 font-semibold transition">
+        <i data-lucide="check-circle-2" class="w-5 h-5"></i><span class="text-[10px]">Aujourd'hui</span>
+      </button>
+      <button onclick="switchTab('grids')" id="nav-grids" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-500 font-medium transition">
+        <i data-lucide="grid" class="w-5 h-5"></i><span class="text-[10px]">Grilles Mois</span>
+      </button>
+      <button onclick="switchTab('shield')" id="nav-shield" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-500 font-medium transition">
+        <i data-lucide="shield" class="w-5 h-5"></i><span class="text-[10px]">Bouclier Apps</span>
+      </button>
+      <button onclick="switchTab('settings')" id="nav-settings" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-500 font-medium transition">
+        <i data-lucide="sliders" class="w-5 h-5"></i><span class="text-[10px]">Réglages</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ================= MODALE PRESETS & CUSTOM (DÉFAUT = 0) ================= -->
+  <div id="presets-modal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-xl flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="w-full max-w-md bg-[#07050e] border-t sm:border border-purple-700/40 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[85vh] overflow-y-auto no-scrollbar">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-extrabold text-white">Activer des Presets ou Custom</h2>
+          <p class="text-[11px] text-slate-400">Tout commence à zéro. Choisis tes objectifs :</p>
+        </div>
+        <button onclick="closePresetsModal()" class="p-1.5 rounded-xl bg-purple-950/60 text-slate-300"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Habitudes Quotidiennes</h3>
+        <div id="modal-habits-list" class="space-y-2"></div>
+      </div>
+
+      <div class="space-y-2 pt-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-rose-400">Addictions & Detox</h3>
+        <div id="modal-detox-list" class="space-y-2"></div>
+      </div>
+
+      <div class="pt-3 border-t border-purple-900/40 space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-purple-300">Créer un suivi personnalisé</h3>
+        <div class="flex gap-2">
+          <input id="custom-name" type="text" placeholder="Nom (ex: Méditation, Sucre...)" class="flex-1 bg-black border border-purple-800/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none" />
+          <select id="custom-type" class="bg-black border border-purple-800/50 rounded-xl px-2.5 py-2 text-xs text-purple-200">
+            <option value="habit">Habitude (+)</option>
+            <option value="abstinence">Abstinence (Timer 0j)</option>
+            <option value="screentime">Limite Temps</option>
+          </select>
+        </div>
+        <button onclick="addCustomGoal()" class="w-full py-2.5 rounded-xl bg-purple-950/80 border border-purple-600/50 text-purple-200 text-xs font-semibold">+ Ajouter</button>
+      </div>
+
+      <button onclick="closePresetsModal()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold text-sm">Valider ma sélection</button>
+    </div>
+  </div>
+
+  <!-- ================= MODALE BREATH GATE (SAS RESPIRATION) ================= -->
+  <div id="breath-modal" class="fixed inset-0 z-50 hidden bg-black flex flex-col items-center justify-between p-6 text-center">
+    <div class="w-full flex items-center justify-between pt-2">
+      <span class="text-[10px] font-mono-num uppercase px-3 py-1 rounded-full bg-purple-950 text-purple-300 border border-purple-700/50">SAS DE RESPIRATION</span>
+      <span class="text-[10px] font-mono-num px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-300 border border-zinc-700">GRAYSCALE ACTIF</span>
+    </div>
+
+    <div class="my-auto flex flex-col items-center space-y-8 max-w-xs">
+      <div class="space-y-1">
+        <p class="text-xs uppercase tracking-widest text-purple-400 font-semibold">Application interceptée</p>
+        <h2 id="breath-app-title" class="text-2xl font-extrabold text-white">Instagram</h2>
+        <p class="text-xs text-slate-400">Respire consciemment avant de décider du temps d'utilisation.</p>
+      </div>
+
+      <div class="relative w-44 h-44 flex items-center justify-center">
+        <div id="breath-circle" class="breath-orb w-36 h-36 rounded-full bg-gradient-to-tr from-purple-700 via-fuchsia-600 to-violet-400 flex flex-col items-center justify-center shadow-[0_0_50px_rgba(168,85,247,0.6)] border border-white/20">
+          <span id="breath-phase" class="text-sm font-extrabold uppercase text-white">Inspire...</span>
+          <span id="breath-sec" class="text-2xl font-mono-num font-bold text-purple-100 mt-1">6s</span>
+        </div>
+      </div>
+
+      <div id="breath-durations" class="w-full space-y-3 opacity-30 pointer-events-none transition-opacity duration-500">
+        <p class="text-xs font-semibold text-slate-300">Choisis ta durée de session (avant un nouveau sas) :</p>
+        <div class="grid grid-cols-5 gap-2">
+          <button onclick="startAppSession(1)" class="py-3 rounded-xl bg-purple-950/80 border border-purple-600/50 text-white font-mono-num font-bold text-sm">1m</button>
+          <button onclick="startAppSession(2)" class="py-3 rounded-xl bg-purple-950/80 border border-purple-600/50 text-white font-mono-num font-bold text-sm">2m</button>
+          <button onclick="startAppSession(3)" class="py-3 rounded-xl bg-purple-950/80 border border-purple-600/50 text-white font-mono-num font-bold text-sm">3m</button>
+          <button onclick="startAppSession(4)" class="py-3 rounded-xl bg-purple-950/80 border border-purple-600/50 text-white font-mono-num font-bold text-sm">4m</button>
+          <button onclick="startAppSession(5)" class="py-3 rounded-xl bg-purple-950/80 border border-purple-600/50 text-white font-mono-num font-bold text-sm">5m</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full max-w-xs pb-2">
+      <button onclick="declineGate()" class="w-full py-3.5 rounded-2xl bg-emerald-600 text-white font-bold text-sm shadow-lg active:scale-98">
+        ✋ J'ai fini / Fermer l'appli
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= MODALE BILAN MATINAL ================= -->
+  <div id="morning-modal" class="fixed inset-0 z-50 hidden bg-black/92 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="w-full max-w-sm oled-card rounded-3xl p-5 space-y-4 border-amber-500/40">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sunrise" class="w-5 h-5 text-amber-400"></i>
+          <h2 class="text-base font-extrabold text-white">Bilan du Matin</h2>
+        </div>
+        <button onclick="closeMorningModal()" class="text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <p class="text-xs text-slate-300">Enregistre ton sommeil de la nuit et valide la journée d'hier.</p>
+
+      <div class="p-3.5 rounded-2xl bg-black/70 border border-purple-900/50 space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-white">Sommeil cette nuit :</span>
+          <span id="morning-sleep-txt" class="font-mono-num text-sm font-bold text-emerald-400">8.0 h</span>
+        </div>
+        <input id="morning-sleep-range" type="range" min="3" max="11" step="0.5" value="8" oninput="document.getElementById('morning-sleep-txt').textContent = this.value + ' h'" class="w-full accent-purple-500" />
+      </div>
+
+      <div class="space-y-2">
+        <p class="text-xs font-bold text-slate-300">Habitudes de la veille :</p>
+        <div id="morning-habits-checklist" class="space-y-1.5 max-h-36 overflow-y-auto pr-1"></div>
+      </div>
+
+      <div class="p-3 rounded-2xl bg-rose-950/30 border border-rose-800/40 flex items-center justify-between">
+        <div>
+          <p class="text-xs font-bold text-rose-200">Veille 100% Clean (0 écart) ?</p>
+        </div>
+        <input id="morning-clean-toggle" type="checkbox" checked class="w-5 h-5 accent-emerald-500" />
+      </div>
+
+      <button onclick="submitMorningReview()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-purple-600 text-black font-extrabold text-sm active:scale-98">Enregistrer le Bilan</button>
+    </div>
+  </div>
+
+  <!-- ================= MODALE CHOIX D'APPLICATIONS (NATIF) ================= -->
+  <div id="apps-modal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-xl flex items-end justify-center">
+    <div class="w-full max-w-md bg-[#07050e] border-t border-purple-700/40 rounded-t-3xl p-5 space-y-3 max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-extrabold text-white">Applications à surveiller</h2>
+        <button onclick="closeAppPicker()" class="p-1.5 rounded-xl bg-purple-950/60 text-slate-300"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <input id="apps-search" type="text" oninput="renderAppPicker()" placeholder="Rechercher..." class="w-full bg-black border border-purple-800/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none" />
+      <div id="apps-picker-list" class="space-y-1.5 overflow-y-auto no-scrollbar min-h-0 flex-1"></div>
+      <button onclick="closeAppPicker()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold text-sm">Terminé</button>
+    </div>
+  </div>
+
+  <div id="toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] max-w-[90%] px-4 py-2 rounded-xl bg-purple-950 border border-purple-500/50 text-xs text-white text-center shadow-lg"></div>
+
+  <script>
+    // --- 1. PONT NATIF ANDROID (AndroidBridge injecté par MainActivity) ---
+    const NATIVE = typeof window.AndroidBridge !== 'undefined';
+    function nb(method, ...args) {
+      try { return window.AndroidBridge[method](...args); } catch (e) { console.error('AndroidBridge.' + method, e); return null; }
+    }
+    function nbJson(method, ...args) {
+      const r = nb(method, ...args);
+      if (!r) return null;
+      try { return JSON.parse(r); } catch (e) { return null; }
+    }
+    let toastTimer = null;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.add('hidden'), 2800);
+    }
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // --- 2. CATALOGUE PRESETS (DÉFAUT = 0) ---
+    const PRESET_HABITS = [
+      { id: 'hab_book', name: 'Lecture (Livre)', target: '30 min', icon: 'book-open' },
+      { id: 'hab_sport', name: 'Sport & Musculation', target: 'Séance', icon: 'dumbbell' },
+      { id: 'hab_sleep', name: 'Sommeil 8 Heures', target: '≥ 8h', icon: 'moon' }
+    ];
+    const PRESET_DETOX = [
+      { id: 'det_porn', name: 'No Porn / Abstinence', type: 'abstinence', icon: 'shield-off' },
+      { id: 'det_screen', name: 'Temps d\'écran Global', type: 'screentime', limitHours: 2.0, icon: 'smartphone' }
+    ];
+
+    const DEFAULT_APPS = [
+      { id: 'app_insta', pkg: 'com.instagram.android', name: 'Instagram', grayscale: true, breathGate: true, usedMins: 0 },
+      { id: 'app_tiktok', pkg: 'com.zhiliaoapp.musically', name: 'TikTok', grayscale: true, breathGate: true, usedMins: 0 },
+      { id: 'app_youtube', pkg: 'com.google.android.youtube', name: 'YouTube', grayscale: false, breathGate: true, usedMins: 0 }
+    ];
+
+    const STORAGE_KEY = 'cosmos_android_v3_state';
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { habits: [], detox: [], history: {}, shieldApps: JSON.parse(JSON.stringify(DEFAULT_APPS)) };
+        return JSON.parse(raw);
+      } catch (e) {
+        return { habits: [], detox: [], history: {}, shieldApps: JSON.parse(JSON.stringify(DEFAULT_APPS)) };
+      }
+    }
+    let state = loadState();
+    let monthOffset = 0;
+    let activeApp = null;
+    let breathTimer = null;
+    let sessionTimer = null;
+    let sessionRemainingSec = 0;
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      pushShieldConfig();
+    }
+
+    // Envoie au service natif la liste des apps à surveiller
+    function pushShieldConfig() {
+      if (!NATIVE) return;
+      const cfg = state.shieldApps.filter(a => a.pkg).map(a => ({ pkg: a.pkg, name: a.name, grayscale: !!a.grayscale, breathGate: !!a.breathGate }));
+      nb('setShieldConfig', JSON.stringify(cfg));
+    }
+
+    function getDateKey(d = new Date()) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    function getDayRec(key = getDateKey()) {
+      if (!state.history[key]) {
+        state.history[key] = { completedHabits: [], relapses: 0, screenTimeHours: 0, sleepHours: 0 };
+      }
+      return state.history[key];
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('live-system-date').textContent = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(now);
+      updateAbstinenceTimers();
+      checkAutoNotifications(now);
+    }
+
+    // --- 3. RENDU DU JOUR ---
+    function renderToday() {
+      const todayKey = getDateKey();
+      const rec = getDayRec(todayKey);
+
+      // Temps d'écran
+      const totalMins = Math.round(rec.screenTimeHours * 60);
+      const h = Math.floor(totalMins / 60);
+      const m = String(totalMins % 60).padStart(2, '0');
+      document.getElementById('today-screentime').textContent = `${h}h ${m}m`;
+
+      const st = state.detox.find(d => d.type === 'screentime');
+      const limit = st ? st.limitHours : 2.0;
+      document.getElementById('screentime-target-label').textContent = `/ Max ${limit}h`;
+      document.getElementById('screentime-bar').style.width = `${Math.min(100, (rec.screenTimeHours / limit) * 100)}%`;
+
+      // État vide
+      const isEmpty = state.habits.length === 0 && state.detox.length === 0;
+      document.getElementById('empty-state').classList.toggle('hidden', !isEmpty);
+      document.getElementById('habits-wrapper').classList.toggle('hidden', state.habits.length === 0);
+      document.getElementById('detox-wrapper').classList.toggle('hidden', state.detox.length === 0);
+
+      // Habitudes
+      const hBox = document.getElementById('habits-container');
+      hBox.innerHTML = '';
+      state.habits.forEach(habit => {
+        const done = rec.completedHabits.includes(habit.id);
+        const streak = calcStreak(habit.id);
+        hBox.innerHTML += `
+          <div onclick="toggleHabit('${habit.id}')" class="oled-card rounded-2xl p-3.5 flex items-center justify-between cursor-pointer transition ${done ? 'border-emerald-500/50 bg-emerald-950/15' : ''}">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center border ${done ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-purple-950/60 text-purple-300 border-purple-800/50'}">
+                <i data-lucide="${done ? 'check' : (habit.icon || 'star')}" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold ${done ? 'text-emerald-300 line-through' : 'text-white'}">${habit.name}</h3>
+                <p class="text-[11px] text-slate-400">${habit.target}</p>
+              </div>
+            </div>
+            <span class="font-mono-num text-xs font-bold px-2 py-1 rounded-lg ${streak > 0 ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-700/40' : 'bg-slate-900 text-slate-400'}">🔥 ${streak} j</span>
+          </div>
+        `;
+      });
+
+      // Detox
+      const dBox = document.getElementById('detox-container');
+      dBox.innerHTML = '';
+      state.detox.forEach(item => {
+        if (item.type === 'abstinence') {
+          dBox.innerHTML += `
+            <div class="oled-card rounded-2xl p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-purple-950 border border-purple-700 flex items-center justify-center text-purple-300"><i data-lucide="${item.icon}" class="w-4 h-4"></i></div>
+                  <div><h3 class="text-sm font-bold text-white">${item.name}</h3><p class="text-[10px] text-slate-400">Compteur temps réel</p></div>
+                </div>
+                <button onclick="resetAbstinence('${item.id}')" class="px-2.5 py-1.5 rounded-xl bg-rose-950/80 border border-rose-700/50 text-rose-300 text-[11px] font-semibold">Rechute (0)</button>
+              </div>
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-black/80 border border-purple-900/40 rounded-xl p-2"><span id="d-${item.id}" class="font-mono-num text-lg font-extrabold text-white">0</span><p class="text-[10px] text-slate-400 uppercase">Jours</p></div>
+                <div class="bg-black/80 border border-purple-900/40 rounded-xl p-2"><span id="h-${item.id}" class="font-mono-num text-lg font-extrabold text-purple-300">0</span><p class="text-[10px] text-slate-400 uppercase">Heures</p></div>
+                <div class="bg-black/80 border border-purple-900/40 rounded-xl p-2"><span id="m-${item.id}" class="font-mono-num text-lg font-extrabold text-fuchsia-300">0</span><p class="text-[10px] text-slate-400 uppercase">Minutes</p></div>
+              </div>
+            </div>
+          `;
+        } else if (item.type === 'screentime') {
+          const isOver = rec.screenTimeHours > item.limitHours;
+          dBox.innerHTML += `
+            <div class="oled-card rounded-2xl p-4 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl ${isOver ? 'bg-rose-950 text-rose-300' : 'bg-purple-950 text-purple-300'} border flex items-center justify-center"><i data-lucide="smartphone" class="w-4 h-4"></i></div>
+                <div><h3 class="text-sm font-bold text-white">${item.name}</h3><p class="text-[11px] ${isOver ? 'text-rose-400 font-semibold' : 'text-emerald-400'}">${rec.screenTimeHours.toFixed(1)}h / Max ${item.limitHours}h</p></div>
+              </div>
+              <div class="flex items-center gap-1">
+                <button onclick="adjustLimit('${item.id}', -0.5)" class="w-7 h-7 rounded-lg bg-purple-950 text-white font-bold">-</button>
+                <span class="text-xs font-mono-num px-1 text-purple-200">${item.limitHours}h</span>
+                <button onclick="adjustLimit('${item.id}', 0.5)" class="w-7 h-7 rounded-lg bg-purple-950 text-white font-bold">+</button>
+              </div>
+            </div>
+          `;
+        }
+      });
+      lucide.createIcons();
+    }
+
+    function toggleHabit(id) {
+      const rec = getDayRec();
+      const idx = rec.completedHabits.indexOf(id);
+      if (idx === -1) rec.completedHabits.push(id); else rec.completedHabits.splice(idx, 1);
+      saveState();
+      renderToday();
+    }
+
+    function calcStreak(id) {
+      let s = 0; const d = new Date();
+      for (let i = 0; i < 365; i++) {
+        const rec = state.history[getDateKey(d)];
+        if (rec && rec.completedHabits.includes(id)) s++;
+        else if (i > 0) break;
+        d.setDate(d.getDate() - 1);
+      }
+      return s;
+    }
+
+    function resetAbstinence(id) {
+      const item = state.detox.find(d => d.id === id);
+      if (!item) return;
+      item.startedAt = Date.now();
+      getDayRec().relapses = (getDayRec().relapses || 0) + 1;
+      saveState();
+      renderToday();
+    }
+
+    function adjustLimit(id, delta) {
+      const item = state.detox.find(d => d.id === id);
+      if (!item) return;
+      item.limitHours = Math.max(0.5, Math.min(12, item.limitHours + delta));
+      saveState();
+      renderToday();
+    }
+
+    function updateAbstinenceTimers() {
+      const now = Date.now();
+      state.detox.filter(d => d.type === 'abstinence').forEach(item => {
+        const diff = Math.max(0, now - (item.startedAt || now));
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diff / (1000 * 60)) % 60);
+        if (document.getElementById(`d-${item.id}`)) document.getElementById(`d-${item.id}`).textContent = d;
+        if (document.getElementById(`h-${item.id}`)) document.getElementById(`h-${item.id}`).textContent = h;
+        if (document.getElementById(`m-${item.id}`)) document.getElementById(`m-${item.id}`).textContent = m;
+      });
+    }
+
+    // --- 4. GRILLES MOIS (VERTE & ROUGE) ---
+    function changeMonth(dir) { monthOffset += dir; renderGrids(); }
+
+    function renderGrids() {
+      const now = new Date();
+      const targetDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
+      const year = targetDate.getFullYear();
+      const month = targetDate.getMonth();
+
+      document.getElementById('grid-month-title').textContent = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(targetDate);
+
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const firstDayIdx = (new Date(year, month, 1).getDay() + 6) % 7;
+
+      const gGrid = document.getElementById('green-grid');
+      const rGrid = document.getElementById('red-grid');
+      gGrid.innerHTML = ''; rGrid.innerHTML = '';
+
+      for (let i = 0; i < firstDayIdx; i++) {
+        gGrid.innerHTML += `<div class="h-9"></div>`;
+        rGrid.innerHTML += `<div class="h-9"></div>`;
+      }
+
+      const totalH = state.habits.length;
+      const st = state.detox.find(d => d.type === 'screentime');
+      const limit = st ? st.limitHours : 2.0;
+
+      let sumRatio = 0, countD = 0, violations = 0;
+      const todayKey = getDateKey(now);
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dObj = new Date(year, month, day);
+        const key = getDateKey(dObj);
+        const rec = state.history[key];
+        const isToday = key === todayKey;
+
+        // Vert
+        let ratio = 0;
+        if (rec && totalH > 0) ratio = rec.completedHabits.filter(id => state.habits.some(h => h.id === id)).length / totalH;
+        if (dObj <= now && totalH > 0) { sumRatio += ratio; countD++; }
+
+        let gColor = 'bg-[#0c0a14] text-slate-500 border-purple-950/40';
+        if (ratio > 0 && ratio <= 0.34) gColor = 'bg-[#064e3b] text-emerald-200 border-emerald-800';
+        else if (ratio > 0.34 && ratio <= 0.67) gColor = 'bg-[#059669] text-white border-emerald-500';
+        else if (ratio >= 1) gColor = 'bg-[#34d399] text-black font-extrabold shadow-[0_0_10px_rgba(52,211,153,0.65)]';
+
+        gGrid.innerHTML += `<button onclick="cycleGridDay('${key}')" class="h-9 rounded-xl border text-xs font-mono-num flex items-center justify-center ${gColor} ${isToday ? 'ring-2 ring-purple-400' : ''}">${day}</button>`;
+
+        // Rouge
+        let redSev = 0;
+        if (rec) {
+          if (rec.relapses > 0) redSev += rec.relapses * 2;
+          if (rec.screenTimeHours > limit) redSev += 2;
+        }
+        if (redSev > 0) violations++;
+
+        let rColor = 'bg-[#0c0a14] text-slate-500 border-purple-950/40';
+        if (redSev === 1) rColor = 'bg-[#4c0519] text-rose-200 border-rose-900';
+        else if (redSev === 2) rColor = 'bg-[#9f1239] text-white border-rose-600';
+        else if (redSev >= 3) rColor = 'bg-[#ff2a55] text-white font-extrabold shadow-[0_0_12px_rgba(255,42,85,0.75)]';
+
+        rGrid.innerHTML += `<button onclick="cycleRedDay('${key}')" class="h-9 rounded-xl border text-xs font-mono-num flex items-center justify-center ${rColor} ${isToday ? 'ring-2 ring-purple-400' : ''}">${day}</button>`;
+      }
+
+      document.getElementById('green-score').textContent = `${countD > 0 ? Math.round((sumRatio/countD)*100) : 0}% ce mois`;
+      document.getElementById('red-score').textContent = `${violations} jour(s) rouge`;
+    }
+
+    function cycleGridDay(key) {
+      if (state.habits.length === 0) { openPresetsModal(); return; }
+      const rec = getDayRec(key);
+      if (rec.completedHabits.length < state.habits.length) {
+        const next = state.habits.find(h => !rec.completedHabits.includes(h.id));
+        if (next) rec.completedHabits.push(next.id);
+      } else { rec.completedHabits = []; }
+      saveState(); renderToday(); renderGrids();
+    }
+
+    function cycleRedDay(key) {
+      const rec = getDayRec(key);
+      rec.relapses = ((rec.relapses || 0) + 1) % 3;
+      saveState(); renderGrids();
+    }
+
+    // --- 5. BOUCLIER D'APPS (GRAYSCALE & BREATH GATE) ---
+    let installedApps = [];
+    let installedPkgs = {};
+    let gateMode = false;
+    let sessionPkg = null;
+
+    function loadInstalledApps() {
+      const l = nbJson('getInstalledApps');
+      if (Array.isArray(l)) {
+        installedApps = l;
+        installedPkgs = {};
+        l.forEach(a => { installedPkgs[a.pkg] = a.name; });
+      }
+    }
+
+    function renderShieldApps() {
+      const box = document.getElementById('shield-apps-list');
+      box.innerHTML = '';
+      if (state.shieldApps.length === 0) {
+        box.innerHTML = `<div class="oled-card rounded-2xl p-4 text-center text-xs text-slate-400">Aucune application surveillée. Ajoute-en une ci-dessous.</div>`;
+      }
+      state.shieldApps.forEach(app => {
+        const unlinked = NATIVE && !app.pkg;
+        const missing = NATIVE && app.pkg && !installedPkgs[app.pkg];
+        const disabled = unlinked || missing;
+        const sub = unlinked ? '⚠️ Non liée à une app installée' : missing ? 'Non installée sur ce téléphone' : `${app.usedMins || 0} min aujourd'hui`;
+        box.innerHTML += `
+          <div class="oled-card rounded-2xl p-3.5 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-purple-950 border border-purple-700 flex items-center justify-center text-purple-300 font-bold shrink-0">${esc(app.name.charAt(0))}</div>
+                <div class="min-w-0"><h3 class="text-sm font-bold text-white truncate">${esc(app.name)}</h3><p class="text-[10px] ${disabled ? 'text-amber-400' : 'text-slate-400'}">${sub}</p></div>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button onclick="removeShieldApp('${app.id}')" title="Retirer" class="p-2 rounded-xl bg-black/60 border border-purple-900/40 text-slate-400 active:scale-95"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                <button onclick="launchShieldApp('${app.id}')" ${disabled ? 'disabled' : ''} class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-xs font-bold active:scale-95 ${disabled ? 'opacity-40' : ''}">Lancer</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-purple-950/60 text-xs">
+              <label class="flex items-center justify-between p-2 rounded-xl bg-black/60 border border-purple-900/30 cursor-pointer">
+                <span class="text-slate-300 text-[11px]">Grayscale Auto</span>
+                <input type="checkbox" ${app.grayscale ? 'checked' : ''} onchange="toggleAppRule('${app.id}', 'grayscale', this.checked)" class="w-4 h-4 accent-purple-500" />
+              </label>
+              <label class="flex items-center justify-between p-2 rounded-xl bg-black/60 border border-purple-900/30 cursor-pointer">
+                <span class="text-slate-300 text-[11px]">Breath Gate</span>
+                <input type="checkbox" ${app.breathGate ? 'checked' : ''} onchange="toggleAppRule('${app.id}', 'breathGate', this.checked)" class="w-4 h-4 accent-fuchsia-500" />
+              </label>
+            </div>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
+
+    function toggleAppRule(id, field, val) {
+      const app = state.shieldApps.find(a => a.id === id);
+      if (app) { app[field] = val; saveState(); }
+    }
+
+    function addShieldApp() {
+      const input = document.getElementById('new-app-name');
+      const name = input.value.trim();
+      if (!name) return;
+      state.shieldApps.push({ id: 'app_' + Date.now(), name, grayscale: true, breathGate: true, usedMins: 0 });
+      input.value = ''; saveState(); renderShieldApps();
+    }
+
+    function removeShieldApp(id) {
+      state.shieldApps = state.shieldApps.filter(a => a.id !== id);
+      saveState(); renderShieldApps();
+    }
+
+    // Sélecteur d'applications installées (natif uniquement)
+    function openAppPicker() {
+      loadInstalledApps();
+      document.getElementById('apps-search').value = '';
+      document.getElementById('apps-modal').classList.remove('hidden');
+      renderAppPicker();
+    }
+    function closeAppPicker() {
+      document.getElementById('apps-modal').classList.add('hidden');
+      renderShieldApps();
+    }
+    function renderAppPicker() {
+      const q = document.getElementById('apps-search').value.trim().toLowerCase();
+      const box = document.getElementById('apps-picker-list');
+      const list = installedApps.filter(a => !q || a.name.toLowerCase().includes(q));
+      box.innerHTML = list.length ? '' : '<p class="text-xs text-slate-400 text-center py-6">Aucune application trouvée.</p>';
+      list.forEach(a => {
+        const on = state.shieldApps.some(s => s.pkg === a.pkg);
+        box.innerHTML += `
+          <div onclick="togglePickerApp('${a.pkg}')" class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer ${on ? 'bg-purple-950/50 border-purple-500/60' : 'bg-black/60 border-purple-900/40'}">
+            <div class="min-w-0"><p class="text-xs font-bold text-white truncate">${esc(a.name)}</p><p class="text-[10px] text-slate-500 truncate">${esc(a.pkg)}</p></div>
+            <span class="text-[11px] font-bold px-2 py-1 rounded-lg shrink-0 ${on ? 'bg-purple-500 text-white' : 'bg-purple-950 text-purple-300'}">${on ? 'Surveillée' : 'Ajouter'}</span>
+          </div>`;
+      });
+    }
+    function togglePickerApp(pkg) {
+      const idx = state.shieldApps.findIndex(s => s.pkg === pkg);
+      if (idx !== -1) {
+        state.shieldApps.splice(idx, 1);
+      } else {
+        const info = installedApps.find(a => a.pkg === pkg);
+        if (!info) return;
+        state.shieldApps.push({ id: 'app_' + pkg, name: info.name, pkg, grayscale: true, breathGate: true, usedMins: 0 });
+      }
+      saveState(); renderAppPicker(); syncAndroidUsageStats();
+    }
+
+    // Bouton « Lancer » : sas de respiration puis ouverture de l'app
+    function launchShieldApp(id) {
+      const app = state.shieldApps.find(a => a.id === id);
+      if (!app) return;
+      activeApp = app;
+      if (NATIVE) {
+        if (!app.pkg) { toast("Lie d'abord cette app via « Choisir une application »"); return; }
+        gateMode = false;
+        if (app.breathGate) openBreathModal(app);
+        else if (!nb('launchApp', app.pkg)) toast("Impossible d'ouvrir " + app.name);
+        return;
+      }
+      if (app.grayscale) document.documentElement.classList.add('grayscale-active');
+      if (app.breathGate) openBreathModal(app); else startAppSession(5);
+    }
+
+    function openBreathModal(app) {
+      document.getElementById('breath-modal').classList.remove('hidden');
+      document.getElementById('breath-app-title').textContent = app.name;
+      const choices = document.getElementById('breath-durations');
+      choices.classList.add('opacity-30', 'pointer-events-none');
+
+      const circle = document.getElementById('breath-circle');
+      const phase = document.getElementById('breath-phase');
+      const sec = document.getElementById('breath-sec');
+
+      let rem = 6;
+      sec.textContent = `${rem}s`;
+      phase.textContent = 'Inspire...';
+      circle.style.transform = 'scale(1.15)';
+      if (breathTimer) clearInterval(breathTimer);
+
+      breathTimer = setInterval(() => {
+        rem--;
+        if (rem > 3) { phase.textContent = 'Inspire...'; circle.style.transform = 'scale(1.15)'; }
+        else if (rem > 0) { phase.textContent = 'Expire...'; circle.style.transform = 'scale(0.75)'; }
+
+        if (rem <= 0) {
+          clearInterval(breathTimer);
+          phase.textContent = 'Prêt'; sec.textContent = 'Choisis';
+          circle.style.transform = 'scale(1)';
+          choices.classList.remove('opacity-30', 'pointer-events-none');
+        } else {
+          sec.textContent = `${rem}s`;
+        }
+      }, 1000);
+    }
+
+    function closeBreathModal() {
+      if (breathTimer) clearInterval(breathTimer);
+      document.getElementById('breath-modal').classList.add('hidden');
+    }
+
+    // « J'ai fini / Fermer l'appli » : on renonce → retour à l'écran d'accueil
+    function declineGate() {
+      closeBreathModal();
+      if (NATIVE) {
+        const wasGate = gateMode;
+        gateMode = false; activeApp = null;
+        if (wasGate) nb('goHome');
+        return;
+      }
+      stopActiveSession();
+    }
+
+    function fmtMMSS(totalSec) {
+      return String(Math.floor(totalSec / 60)).padStart(2, '0') + ':' + String(totalSec % 60).padStart(2, '0');
+    }
+
+    function startAppSession(mins) {
+      closeBreathModal();
+      if (!activeApp) return;
+
+      if (NATIVE) {
+        gateMode = false;
+        nb('startSession', activeApp.pkg, mins);
+        refreshSession();
+        if (!nb('launchApp', activeApp.pkg)) toast("Impossible d'ouvrir " + activeApp.name);
+        return;
+      }
+
+      // Mode navigateur (simulation)
+      activeApp.usedMins = (activeApp.usedMins || 0) + mins;
+      const rec = getDayRec();
+      rec.screenTimeHours = Number((rec.screenTimeHours + (mins / 60)).toFixed(2));
+      saveState(); renderToday(); renderShieldApps();
+
+      document.getElementById('active-session-banner').classList.remove('hidden');
+      document.getElementById('banner-app-name').textContent = activeApp.name;
+
+      sessionRemainingSec = mins * 60;
+      if (sessionTimer) clearInterval(sessionTimer);
+      sessionTimer = setInterval(() => {
+        sessionRemainingSec--;
+        document.getElementById('banner-countdown').textContent = fmtMMSS(Math.max(0, sessionRemainingSec));
+        if (sessionRemainingSec <= 0) {
+          clearInterval(sessionTimer);
+          alert(`⏳ Temps écoulé sur ${activeApp.name} (${mins} min). Retour au sas de respiration !`);
+          openBreathModal(activeApp);
+        }
+      }, 1000);
+    }
+
+    // Bandeau de session active (natif : lit la session stockée par le service)
+    function refreshSession() {
+      if (!NATIVE) return;
+      if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
+      const banner = document.getElementById('active-session-banner');
+      const s = nbJson('getSession');
+      if (!s) { banner.classList.add('hidden'); sessionPkg = null; return; }
+      sessionPkg = s.pkg;
+      const app = state.shieldApps.find(a => a.pkg === s.pkg);
+      document.getElementById('banner-app-name').textContent = app ? app.name : s.pkg;
+      banner.classList.remove('hidden');
+      const tick = () => {
+        const rem = Math.max(0, Math.round((s.endsAt - Date.now()) / 1000));
+        document.getElementById('banner-countdown').textContent = fmtMMSS(rem);
+        if (rem <= 0) { clearInterval(sessionTimer); sessionTimer = null; banner.classList.add('hidden'); }
+      };
+      tick();
+      sessionTimer = setInterval(tick, 1000);
+    }
+
+    function stopActiveSession() {
+      if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
+      document.getElementById('active-session-banner').classList.add('hidden');
+      document.documentElement.classList.remove('grayscale-active');
+      if (NATIVE && sessionPkg) { nb('endSession', sessionPkg); sessionPkg = null; }
+      activeApp = null;
+    }
+
+    // Appelé par le service natif : une app surveillée vient de s'ouvrir sans session valide
+    window.__nativeIntent = function () {
+      if (!NATIVE) return;
+      const it = nbJson('consumeIntent');
+      if (!it) return;
+      if (it.gate) {
+        const app = state.shieldApps.find(a => a.pkg === it.gate);
+        if (app) {
+          closeMorningModal();
+          document.getElementById('presets-modal').classList.add('hidden');
+          document.getElementById('apps-modal').classList.add('hidden');
+          activeApp = app; gateMode = true;
+          openBreathModal(app);
+        }
+      }
+      if (it.open === 'morning') openMorningModal();
+    };
+
+    window.__onNativeResume = function () {
+      refreshPermissions();
+      syncAndroidUsageStats();
+      refreshSession();
+      window.__nativeIntent();
+    };
+
+    // Bouton retour Android : true = géré par la page
+    window.__onBack = function () {
+      if (!document.getElementById('breath-modal').classList.contains('hidden')) { declineGate(); return true; }
+      if (!document.getElementById('apps-modal').classList.contains('hidden')) { closeAppPicker(); return true; }
+      if (!document.getElementById('presets-modal').classList.contains('hidden')) { closePresetsModal(); return true; }
+      if (!document.getElementById('morning-modal').classList.contains('hidden')) { closeMorningModal(); return true; }
+      if (document.getElementById('tab-today').classList.contains('hidden')) { switchTab('today'); return true; }
+      return false;
+    };
+
+    // --- 6. PERMISSIONS & RÉGLAGES ANDROID NATIFS ---
+    let perms = { usage: false, overlay: false, notif: false, battery: false, secure: false };
+    const ADB_CMD = 'adb shell pm grant com.cosmos.shield android.permission.WRITE_SECURE_SETTINGS';
+
+    function refreshPermissions() {
+      if (NATIVE) {
+        const p = nbJson('getPermissions');
+        if (p) perms = p;
+      }
+      renderPermissions();
+    }
+
+    function renderPermissions() {
+      ['usage', 'overlay', 'notif', 'battery', 'secure'].forEach(k => {
+        const badge = document.getElementById('perm-' + k);
+        if (!badge) return;
+        const ok = !!perms[k];
+        badge.textContent = !NATIVE ? 'App Android' : ok ? 'Activé' : (k === 'secure' ? 'Optionnel' : 'À activer');
+        badge.className = 'text-[10px] px-2 py-0.5 rounded-full border font-mono-num ' +
+          (!NATIVE ? 'bg-slate-900 text-slate-400 border-slate-700'
+            : ok ? 'bg-emerald-950 text-emerald-300 border-emerald-700/50'
+            : k === 'secure' ? 'bg-slate-900 text-slate-300 border-slate-700'
+            : 'bg-rose-950 text-rose-300 border-rose-700/50');
+      });
+      const critical = NATIVE && !(perms.usage && perms.overlay);
+      const dot = document.getElementById('settings-dot');
+      if (dot) dot.className = 'w-2 h-2 rounded-full absolute top-1.5 right-1.5 ' + (critical ? 'bg-amber-400' : 'bg-emerald-400');
+      const warn = document.getElementById('shield-warning');
+      if (warn) warn.classList.toggle('hidden', !critical);
+    }
+
+    function openAndroidSettings(type) {
+      if (!NATIVE) { toast("Disponible uniquement dans l'app Android"); return; }
+      nb('openSettings', type);
+    }
+
+    function requestAppNotifications() {
+      if (NATIVE) { nb('requestNotifications'); return; }
+      if ('Notification' in window) {
+        Notification.requestPermission().then(perm => {
+          if (perm === 'granted') toast('Notifications activées');
+        });
+      }
+    }
+
+    function copyAdb() {
+      if (NATIVE) nb('copyText', ADB_CMD);
+      else if (navigator.clipboard) navigator.clipboard.writeText(ADB_CMD);
+      toast('Commande copiée');
+    }
+
+    function restoreColors() {
+      if (!NATIVE) return;
+      nb('restoreColors');
+      toast('Couleurs rétablies');
+    }
+
+    // Temps d'écran RÉEL lu via UsageStatsManager
+    function syncAndroidUsageStats() {
+      const status = document.getElementById('screentime-status');
+      if (!NATIVE) {
+        status.textContent = "Mode navigateur : temps d'écran simulé. Installe l'app Android pour la mesure réelle.";
+        return;
+      }
+      const p = nbJson('getPermissions');
+      if (p) { perms = p; renderPermissions(); }
+      if (!perms.usage) {
+        status.innerHTML = '⚠️ Accès aux données d\'utilisation requis — <span class="underline text-purple-300" onclick="openAndroidSettings(\'usage\')">activer</span>';
+        return;
+      }
+      const u = nbJson('getUsage');
+      if (!u) return;
+      const rec = getDayRec();
+      rec.screenTimeHours = Number((u.totalMin / 60).toFixed(2));
+      state.shieldApps.forEach(a => { if (a.pkg) a.usedMins = (u.perApp && u.perApp[a.pkg]) || 0; });
+      saveState();
+      renderToday();
+      if (!document.getElementById('tab-shield').classList.contains('hidden')) renderShieldApps();
+      if (!document.getElementById('tab-grids').classList.contains('hidden')) renderGrids();
+      status.textContent = 'Mesuré par Android • mis à jour à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Navigateur uniquement (dans l'app Android, ce sont les alarmes natives qui notifient)
+    let lastNotifKey = '';
+    function checkAutoNotifications(now) {
+      if (NATIVE) return;
+      const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const key = getDateKey(now) + hhmm;
+      if (hhmm === '21:30' && key !== lastNotifKey && 'Notification' in window && Notification.permission === 'granted') {
+        lastNotifKey = key;
+        new Notification('🌙 21h30 — Couvre-feu Digital', { body: 'Pose ton téléphone, passe en mode nuit et prends ton livre avant de dormir.' });
+      }
+    }
+
+    // --- 7. MODALES PRESETS & BILAN MATIN ---
+    function openPresetsModal() {
+      document.getElementById('presets-modal').classList.remove('hidden');
+      const hBox = document.getElementById('modal-habits-list');
+      const dBox = document.getElementById('modal-detox-list');
+      hBox.innerHTML = ''; dBox.innerHTML = '';
+
+      PRESET_HABITS.forEach(p => {
+        const active = state.habits.some(h => h.id === p.id);
+        hBox.innerHTML += `
+          <div onclick="togglePresetHabit('${p.id}')" class="p-3 rounded-2xl border flex items-center justify-between cursor-pointer ${active ? 'bg-emerald-950/30 border-emerald-500/60' : 'bg-black/60 border-purple-900/40'}">
+            <div><p class="text-xs font-bold text-white">${p.name}</p><p class="text-[10px] text-slate-400">${p.target}</p></div>
+            <span class="text-xs font-bold px-2 py-1 rounded-lg ${active ? 'bg-emerald-500 text-black' : 'bg-purple-950 text-purple-300'}">${active ? 'Activé' : 'Activer'}</span>
+          </div>
+        `;
+      });
+
+      PRESET_DETOX.forEach(p => {
+        const active = state.detox.some(d => d.id === p.id);
+        dBox.innerHTML += `
+          <div onclick="togglePresetDetox('${p.id}')" class="p-3 rounded-2xl border flex items-center justify-between cursor-pointer ${active ? 'bg-rose-950/30 border-rose-500/60' : 'bg-black/60 border-purple-900/40'}">
+            <div><p class="text-xs font-bold text-white">${p.name}</p><p class="text-[10px] text-slate-400">${p.type === 'abstinence' ? 'Compteur 0j' : 'Limite ' + p.limitHours + 'h'}</p></div>
+            <span class="text-xs font-bold px-2 py-1 rounded-lg ${active ? 'bg-rose-500 text-white' : 'bg-purple-950 text-purple-300'}">${active ? 'Activé' : 'Activer'}</span>
+          </div>
+        `;
+      });
+    }
+
+    function closePresetsModal() {
+      document.getElementById('presets-modal').classList.add('hidden');
+      renderToday(); renderGrids();
+    }
+
+    function togglePresetHabit(id) {
+      const idx = state.habits.findIndex(h => h.id === id);
+      if (idx === -1) state.habits.push(PRESET_HABITS.find(p => p.id === id));
+      else state.habits.splice(idx, 1);
+      saveState(); openPresetsModal();
+    }
+
+    function togglePresetDetox(id) {
+      const idx = state.detox.findIndex(d => d.id === id);
+      if (idx === -1) state.detox.push({ ...PRESET_DETOX.find(p => p.id === id), startedAt: Date.now() });
+      else state.detox.splice(idx, 1);
+      saveState(); openPresetsModal();
+    }
+
+    function addCustomGoal() {
+      const name = document.getElementById('custom-name').value.trim();
+      const type = document.getElementById('custom-type').value;
+      if (!name) return;
+      if (type === 'habit') state.habits.push({ id: 'ch_' + Date.now(), name, target: 'Perso', icon: 'check' });
+      else if (type === 'abstinence') state.detox.push({ id: 'cd_' + Date.now(), name, type: 'abstinence', startedAt: Date.now(), icon: 'shield-off' });
+      else state.detox.push({ id: 'cs_' + Date.now(), name, type: 'screentime', limitHours: 1.5 });
+      document.getElementById('custom-name').value = '';
+      saveState(); openPresetsModal();
+    }
+
+    function openMorningModal() {
+      document.getElementById('morning-modal').classList.remove('hidden');
+      const box = document.getElementById('morning-habits-checklist');
+      box.innerHTML = '';
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+      const yRec = getDayRec(getDateKey(yesterday));
+
+      state.habits.forEach(h => {
+        const checked = yRec.completedHabits.includes(h.id);
+        box.innerHTML += `
+          <label class="flex items-center justify-between p-2 rounded-xl bg-black/60 border border-purple-900/40">
+            <span class="text-xs text-white">${h.name}</span>
+            <input type="checkbox" data-id="${h.id}" ${checked ? 'checked' : ''} class="morning-check w-4 h-4 accent-emerald-500" />
+          </label>
+        `;
+      });
+    }
+
+    function closeMorningModal() { document.getElementById('morning-modal').classList.add('hidden'); }
+
+    function submitMorningReview() {
+      const sleep = parseFloat(document.getElementById('morning-sleep-range').value);
+      const clean = document.getElementById('morning-clean-toggle').checked;
+      getDayRec().sleepHours = sleep;
+
+      const sleepHabit = state.habits.find(h => h.id === 'hab_sleep' || h.name.toLowerCase().includes('sommeil'));
+      if (sleepHabit && sleep >= 8 && !getDayRec().completedHabits.includes(sleepHabit.id)) getDayRec().completedHabits.push(sleepHabit.id);
+
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+      const yRec = getDayRec(getDateKey(yesterday));
+      yRec.completedHabits = [];
+      document.querySelectorAll('.morning-check').forEach(ch => {
+        if (ch.checked) yRec.completedHabits.push(ch.getAttribute('data-id'));
+      });
+      yRec.relapses = clean ? 0 : 1;
+
+      saveState(); closeMorningModal(); renderToday(); renderGrids();
+    }
+
+    function factoryReset() {
+      if (confirm('Tout effacer et remettre à zéro ?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        state = { habits: [], detox: [], history: {}, shieldApps: JSON.parse(JSON.stringify(DEFAULT_APPS)) };
+        pushShieldConfig();
+        if (NATIVE) { stopActiveSession(); }
+        renderToday(); renderGrids(); renderShieldApps();
+        switchTab('today');
+      }
+    }
+
+    function openSettingsModal() { switchTab('settings'); }
+
+    function switchTab(tab) {
+      ['today', 'grids', 'shield', 'settings'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById(`nav-${t}`);
+        btn.className = t === tab ? 'flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-purple-400 font-semibold transition' : 'flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-500 font-medium transition';
+      });
+      if (tab === 'grids') renderGrids();
+      if (tab === 'shield') { if (NATIVE) loadInstalledApps(); renderShieldApps(); }
+      if (tab === 'settings') refreshPermissions();
+      lucide.createIcons();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('add-app-web').classList.toggle('hidden', NATIVE);
+      document.getElementById('add-app-native').classList.toggle('hidden', !NATIVE);
+      if (NATIVE) { loadInstalledApps(); pushShieldConfig(); }
+      updateClock(); setInterval(updateClock, 1000);
+      renderToday(); renderGrids(); renderShieldApps();
+      refreshPermissions(); syncAndroidUsageStats(); refreshSession();
+      window.__nativeIntent();
+      setInterval(() => { if (NATIVE && !document.hidden) syncAndroidUsageStats(); }, 30000);
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>

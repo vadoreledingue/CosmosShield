@@ -8,12 +8,12 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Cosmos Discipline — Android Edition</title>
 
-  <link id="pwa-manifest" rel="manifest" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="app.css" />
+  <script src="lucide.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+    @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('fonts/inter-latin-wght-normal.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 100 800; font-display: swap; src: url('fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2'); }
     :root { color-scheme: dark; }
     * { -webkit-tap-highlight-color: transparent; user-select: none; }
     body { background-color: #000000; color: #f8fafc; font-family: 'Inter', sans-serif; overscroll-behavior-y: none; }
@@ -46,6 +46,9 @@
     .breath-orb { transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    main-tab { display: block; }
+    input, textarea, select, .select-text { -webkit-user-select: text; user-select: text; }
+    button:disabled { pointer-events: none; }
   </style>
 </head>
 <body class="galaxy-bg min-h-screen flex justify-center items-start overflow-x-hidden">
@@ -218,14 +221,21 @@
             Protection & Sas d'Interception Android
           </h2>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Coche tes applications. À l'ouverture : passage automatique en <strong class="text-slate-200">Grayscale (Noir & Blanc)</strong> + <strong class="text-purple-300">Breath Gate</strong> (respiration de 6s + choix de durée 1 à 5 min avant re-pop).
+            Choisis tes applications. À chaque ouverture : <strong class="text-slate-200">noir &amp; blanc</strong> + <strong class="text-purple-300">Breath Gate</strong> (respiration de 6s, puis durée de 1 à 5 min avant un nouveau sas).
           </p>
         </div>
+        <div id="shield-warning" class="hidden oled-card rounded-2xl p-3 border-amber-500/40 flex items-center justify-between gap-3">
+          <p class="text-[11px] text-amber-300 leading-snug">⚠️ Active l'accès aux données d'utilisation et l'affichage par-dessus les autres apps pour que le bouclier fonctionne.</p>
+          <button onclick="switchTab('settings')" class="px-3 py-1.5 rounded-xl bg-amber-500 text-black text-xs font-bold shrink-0">Réglages</button>
+        </div>
         <div id="shield-apps-list" class="space-y-2.5"></div>
-        <div class="oled-card rounded-2xl p-3.5 flex gap-2">
+        <div id="add-app-web" class="oled-card rounded-2xl p-3.5 flex gap-2">
           <input id="new-app-name" type="text" placeholder="Ajouter une app (ex: Snapchat, Twitter...)" class="flex-1 bg-black/80 border border-purple-900/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none" />
           <button onclick="addShieldApp()" class="px-3.5 py-2 rounded-xl bg-purple-600 text-white text-xs font-semibold">Ajouter</button>
         </div>
+        <button id="add-app-native" onclick="openAppPicker()" class="hidden w-full py-3 rounded-2xl bg-purple-950/70 border border-purple-600/50 text-purple-200 text-sm font-semibold flex items-center justify-center gap-2 active:scale-98">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i> Choisir une application installée
+        </button>
       </main-tab>
 
       <!-- ================= ONGLÈT 4 : RÉGLAGES & PERMISSIONS ================= -->
@@ -233,36 +243,58 @@
         <div class="oled-card rounded-2xl p-4 space-y-4">
           <h3 class="text-sm font-bold text-white flex items-center gap-2">
             <i data-lucide="smartphone" class="w-4 h-4 text-emerald-400"></i>
-            Permissions Android (Sans Code / Sans ADB)
+            Permissions Android
           </h3>
           <p class="text-xs text-slate-400 leading-relaxed">
-            Pour que l'application fonctionne parfaitement sur ton téléphone, active ces accès directement dans les réglages système natifs en un clic :
+            Active ces accès dans les réglages système (un seul clic chacun). Au retour dans l'app, le statut se met à jour tout seul.
           </p>
 
           <div class="space-y-2.5 text-xs">
             <div class="p-3 rounded-2xl bg-black/80 border border-purple-900/50 flex items-center justify-between gap-3">
-              <div>
-                <p class="font-bold text-white">1. Accès aux Données d'Utilisation</p>
-                <p class="text-[11px] text-slate-400">Permet la lecture automatique du temps d'écran.</p>
+              <div class="min-w-0">
+                <p class="font-bold text-white flex items-center gap-2 flex-wrap">1. Données d'utilisation <span id="perm-usage"></span></p>
+                <p class="text-[11px] text-slate-400">Lit le temps d'écran réel et détecte l'app ouverte.</p>
               </div>
-              <button onclick="openAndroidSettings('usage')" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Ouvrir Paramètres</button>
+              <button onclick="openAndroidSettings('usage')" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Ouvrir</button>
             </div>
 
             <div class="p-3 rounded-2xl bg-black/80 border border-purple-900/50 flex items-center justify-between gap-3">
-              <div>
-                <p class="font-bold text-white">2. Affichage par-dessus les autres apps</p>
-                <p class="text-[11px] text-slate-400">Permet d'afficher le Breath Screen au premier plan.</p>
+              <div class="min-w-0">
+                <p class="font-bold text-white flex items-center gap-2 flex-wrap">2. Affichage par-dessus <span id="perm-overlay"></span></p>
+                <p class="text-[11px] text-slate-400">Permet d'afficher le sas de respiration devant l'app.</p>
               </div>
-              <button onclick="openAndroidSettings('overlay')" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Ouvrir Paramètres</button>
+              <button onclick="openAndroidSettings('overlay')" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Ouvrir</button>
             </div>
 
             <div class="p-3 rounded-2xl bg-black/80 border border-purple-900/50 flex items-center justify-between gap-3">
-              <div>
-                <p class="font-bold text-white">3. Notifications (21h30 & Matin)</p>
-                <p class="text-[11px] text-slate-400">Couvre-feu digital et rappel de lecture.</p>
+              <div class="min-w-0">
+                <p class="font-bold text-white flex items-center gap-2 flex-wrap">3. Notifications <span id="perm-notif"></span></p>
+                <p class="text-[11px] text-slate-400">Couvre-feu à 21h30 et bilan du matin à 8h.</p>
               </div>
               <button onclick="requestAppNotifications()" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Activer</button>
             </div>
+
+            <div class="p-3 rounded-2xl bg-black/80 border border-purple-900/50 flex items-center justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-bold text-white flex items-center gap-2 flex-wrap">4. Batterie sans limite <span id="perm-battery"></span></p>
+                <p class="text-[11px] text-slate-400">Empêche Android d'arrêter le bouclier en arrière-plan.</p>
+              </div>
+              <button onclick="openAndroidSettings('battery')" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white font-semibold shrink-0">Ouvrir</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="oled-card rounded-2xl p-4 space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 flex-wrap">
+            <i data-lucide="moon" class="w-4 h-4 text-purple-300"></i> Noir &amp; blanc réel <span id="perm-secure"></span>
+          </h3>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Android interdit aux apps de passer l'écran en niveaux de gris sans une autorisation spéciale. À faire <strong class="text-slate-200">une seule fois</strong> depuis un PC (débogage USB activé) :
+          </p>
+          <div class="p-2.5 rounded-xl bg-black border border-purple-900/50 font-mono-num text-[10px] text-emerald-300 select-text break-all">adb shell pm grant com.cosmos.shield android.permission.WRITE_SECURE_SETTINGS</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="copyAdb()" class="py-2.5 rounded-xl bg-purple-950/80 border border-purple-600/50 text-purple-200 text-xs font-semibold">Copier la commande</button>
+            <button onclick="restoreColors()" class="py-2.5 rounded-xl bg-black border border-slate-700 text-slate-200 text-xs font-semibold">Rétablir les couleurs</button>
           </div>
         </div>
 
@@ -365,7 +397,7 @@
     </div>
 
     <div class="w-full max-w-xs pb-2">
-      <button onclick="closeBreathModal()" class="w-full py-3.5 rounded-2xl bg-emerald-600 text-white font-bold text-sm shadow-lg active:scale-98">
+      <button onclick="declineGate()" class="w-full py-3.5 rounded-2xl bg-emerald-600 text-white font-bold text-sm shadow-lg active:scale-98">
         ✋ J'ai fini / Fermer l'appli
       </button>
     </div>
@@ -407,18 +439,43 @@
     </div>
   </div>
 
+  <!-- ================= MODALE CHOIX D'APPLICATIONS (NATIF) ================= -->
+  <div id="apps-modal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-xl flex items-end justify-center">
+    <div class="w-full max-w-md bg-[#07050e] border-t border-purple-700/40 rounded-t-3xl p-5 space-y-3 max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between">
+        <h2 class="text-base font-extrabold text-white">Applications à surveiller</h2>
+        <button onclick="closeAppPicker()" class="p-1.5 rounded-xl bg-purple-950/60 text-slate-300"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <input id="apps-search" type="text" oninput="renderAppPicker()" placeholder="Rechercher..." class="w-full bg-black border border-purple-800/50 rounded-xl px-3 py-2 text-xs text-white focus:outline-none" />
+      <div id="apps-picker-list" class="space-y-1.5 overflow-y-auto no-scrollbar min-h-0 flex-1"></div>
+      <button onclick="closeAppPicker()" class="w-full py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white font-bold text-sm">Terminé</button>
+    </div>
+  </div>
+
+  <div id="toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] max-w-[90%] px-4 py-2 rounded-xl bg-purple-950 border border-purple-500/50 text-xs text-white text-center shadow-lg"></div>
+
   <script>
-    // --- 1. CONFIGURATION PWA & MANIFEST ---
-    const manifestData = {
-      name: "Cosmos Discipline Shield",
-      short_name: "CosmosShield",
-      start_url: ".",
-      display: "standalone",
-      background_color: "#000000",
-      theme_color: "#000000",
-      icons: [{ src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%2305020a'/><circle cx='50' cy='50' r='32' fill='none' stroke='%239333ea' stroke-width='8'/><circle cx='50' cy='50' r='12' fill='%23c084fc'/></svg>", sizes: "192x192", type: "image/svg+xml" }]
-    };
-    document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(new Blob([JSON.stringify(manifestData)], {type: 'application/manifest+json'})));
+    // --- 1. PONT NATIF ANDROID (AndroidBridge injecté par MainActivity) ---
+    const NATIVE = typeof window.AndroidBridge !== 'undefined';
+    function nb(method, ...args) {
+      try { return window.AndroidBridge[method](...args); } catch (e) { console.error('AndroidBridge.' + method, e); return null; }
+    }
+    function nbJson(method, ...args) {
+      const r = nb(method, ...args);
+      if (!r) return null;
+      try { return JSON.parse(r); } catch (e) { return null; }
+    }
+    let toastTimer = null;
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.add('hidden'), 2800);
+    }
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
 
     // --- 2. CATALOGUE PRESETS (DÉFAUT = 0) ---
     const PRESET_HABITS = [
@@ -432,9 +489,9 @@
     ];
 
     const DEFAULT_APPS = [
-      { id: 'app_insta', name: 'Instagram', grayscale: true, breathGate: true, usedMins: 0 },
-      { id: 'app_tiktok', name: 'TikTok', grayscale: true, breathGate: true, usedMins: 0 },
-      { id: 'app_youtube', name: 'YouTube', grayscale: false, breathGate: true, usedMins: 0 }
+      { id: 'app_insta', pkg: 'com.instagram.android', name: 'Instagram', grayscale: true, breathGate: true, usedMins: 0 },
+      { id: 'app_tiktok', pkg: 'com.zhiliaoapp.musically', name: 'TikTok', grayscale: true, breathGate: true, usedMins: 0 },
+      { id: 'app_youtube', pkg: 'com.google.android.youtube', name: 'YouTube', grayscale: false, breathGate: true, usedMins: 0 }
     ];
 
     const STORAGE_KEY = 'cosmos_android_v3_state';
@@ -456,6 +513,14 @@
 
     function saveState() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      pushShieldConfig();
+    }
+
+    // Envoie au service natif la liste des apps à surveiller
+    function pushShieldConfig() {
+      if (!NATIVE) return;
+      const cfg = state.shieldApps.filter(a => a.pkg).map(a => ({ pkg: a.pkg, name: a.name, grayscale: !!a.grayscale, breathGate: !!a.breathGate }));
+      nb('setShieldConfig', JSON.stringify(cfg));
     }
 
     function getDateKey(d = new Date()) {
@@ -694,19 +759,43 @@
       saveState(); renderGrids();
     }
 
-    // --- 5. SHIELD APPS (GRAYSCALE & BREATH GATE) ---
+    // --- 5. BOUCLIER D'APPS (GRAYSCALE & BREATH GATE) ---
+    let installedApps = [];
+    let installedPkgs = {};
+    let gateMode = false;
+    let sessionPkg = null;
+
+    function loadInstalledApps() {
+      const l = nbJson('getInstalledApps');
+      if (Array.isArray(l)) {
+        installedApps = l;
+        installedPkgs = {};
+        l.forEach(a => { installedPkgs[a.pkg] = a.name; });
+      }
+    }
+
     function renderShieldApps() {
       const box = document.getElementById('shield-apps-list');
       box.innerHTML = '';
+      if (state.shieldApps.length === 0) {
+        box.innerHTML = `<div class="oled-card rounded-2xl p-4 text-center text-xs text-slate-400">Aucune application surveillée. Ajoute-en une ci-dessous.</div>`;
+      }
       state.shieldApps.forEach(app => {
+        const unlinked = NATIVE && !app.pkg;
+        const missing = NATIVE && app.pkg && !installedPkgs[app.pkg];
+        const disabled = unlinked || missing;
+        const sub = unlinked ? '⚠️ Non liée à une app installée' : missing ? 'Non installée sur ce téléphone' : `${app.usedMins || 0} min aujourd'hui`;
         box.innerHTML += `
           <div class="oled-card rounded-2xl p-3.5 space-y-3">
             <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-purple-950 border border-purple-700 flex items-center justify-center text-purple-300 font-bold">${app.name.charAt(0)}</div>
-                <div><h3 class="text-sm font-bold text-white">${app.name}</h3><p class="text-[10px] text-slate-400">${app.usedMins || 0} min aujourd'hui</p></div>
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-purple-950 border border-purple-700 flex items-center justify-center text-purple-300 font-bold shrink-0">${esc(app.name.charAt(0))}</div>
+                <div class="min-w-0"><h3 class="text-sm font-bold text-white truncate">${esc(app.name)}</h3><p class="text-[10px] ${disabled ? 'text-amber-400' : 'text-slate-400'}">${sub}</p></div>
               </div>
-              <button onclick="triggerAppSimulation('${app.id}')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-xs font-bold active:scale-95">Lancer</button>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button onclick="removeShieldApp('${app.id}')" title="Retirer" class="p-2 rounded-xl bg-black/60 border border-purple-900/40 text-slate-400 active:scale-95"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                <button onclick="launchShieldApp('${app.id}')" ${disabled ? 'disabled' : ''} class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-xs font-bold active:scale-95 ${disabled ? 'opacity-40' : ''}">Lancer</button>
+              </div>
             </div>
             <div class="grid grid-cols-2 gap-2 pt-1 border-t border-purple-950/60 text-xs">
               <label class="flex items-center justify-between p-2 rounded-xl bg-black/60 border border-purple-900/30 cursor-pointer">
@@ -721,6 +810,7 @@
           </div>
         `;
       });
+      lucide.createIcons();
     }
 
     function toggleAppRule(id, field, val) {
@@ -736,14 +826,62 @@
       input.value = ''; saveState(); renderShieldApps();
     }
 
-    function triggerAppSimulation(id) {
+    function removeShieldApp(id) {
+      state.shieldApps = state.shieldApps.filter(a => a.id !== id);
+      saveState(); renderShieldApps();
+    }
+
+    // Sélecteur d'applications installées (natif uniquement)
+    function openAppPicker() {
+      loadInstalledApps();
+      document.getElementById('apps-search').value = '';
+      document.getElementById('apps-modal').classList.remove('hidden');
+      renderAppPicker();
+    }
+    function closeAppPicker() {
+      document.getElementById('apps-modal').classList.add('hidden');
+      renderShieldApps();
+    }
+    function renderAppPicker() {
+      const q = document.getElementById('apps-search').value.trim().toLowerCase();
+      const box = document.getElementById('apps-picker-list');
+      const list = installedApps.filter(a => !q || a.name.toLowerCase().includes(q));
+      box.innerHTML = list.length ? '' : '<p class="text-xs text-slate-400 text-center py-6">Aucune application trouvée.</p>';
+      list.forEach(a => {
+        const on = state.shieldApps.some(s => s.pkg === a.pkg);
+        box.innerHTML += `
+          <div onclick="togglePickerApp('${a.pkg}')" class="p-2.5 rounded-xl border flex items-center justify-between cursor-pointer ${on ? 'bg-purple-950/50 border-purple-500/60' : 'bg-black/60 border-purple-900/40'}">
+            <div class="min-w-0"><p class="text-xs font-bold text-white truncate">${esc(a.name)}</p><p class="text-[10px] text-slate-500 truncate">${esc(a.pkg)}</p></div>
+            <span class="text-[11px] font-bold px-2 py-1 rounded-lg shrink-0 ${on ? 'bg-purple-500 text-white' : 'bg-purple-950 text-purple-300'}">${on ? 'Surveillée' : 'Ajouter'}</span>
+          </div>`;
+      });
+    }
+    function togglePickerApp(pkg) {
+      const idx = state.shieldApps.findIndex(s => s.pkg === pkg);
+      if (idx !== -1) {
+        state.shieldApps.splice(idx, 1);
+      } else {
+        const info = installedApps.find(a => a.pkg === pkg);
+        if (!info) return;
+        state.shieldApps.push({ id: 'app_' + pkg, name: info.name, pkg, grayscale: true, breathGate: true, usedMins: 0 });
+      }
+      saveState(); renderAppPicker(); syncAndroidUsageStats();
+    }
+
+    // Bouton « Lancer » : sas de respiration puis ouverture de l'app
+    function launchShieldApp(id) {
       const app = state.shieldApps.find(a => a.id === id);
       if (!app) return;
       activeApp = app;
-
+      if (NATIVE) {
+        if (!app.pkg) { toast("Lie d'abord cette app via « Choisir une application »"); return; }
+        gateMode = false;
+        if (app.breathGate) openBreathModal(app);
+        else if (!nb('launchApp', app.pkg)) toast("Impossible d'ouvrir " + app.name);
+        return;
+      }
       if (app.grayscale) document.documentElement.classList.add('grayscale-active');
-      if (app.breathGate) openBreathModal(app);
-      else startAppSession(5);
+      if (app.breathGate) openBreathModal(app); else startAppSession(5);
     }
 
     function openBreathModal(app) {
@@ -758,6 +896,8 @@
 
       let rem = 6;
       sec.textContent = `${rem}s`;
+      phase.textContent = 'Inspire...';
+      circle.style.transform = 'scale(1.15)';
       if (breathTimer) clearInterval(breathTimer);
 
       breathTimer = setInterval(() => {
@@ -776,28 +916,53 @@
       }, 1000);
     }
 
+    function closeBreathModal() {
+      if (breathTimer) clearInterval(breathTimer);
+      document.getElementById('breath-modal').classList.add('hidden');
+    }
+
+    // « J'ai fini / Fermer l'appli » : on renonce → retour à l'écran d'accueil
+    function declineGate() {
+      closeBreathModal();
+      if (NATIVE) {
+        const wasGate = gateMode;
+        gateMode = false; activeApp = null;
+        if (wasGate) nb('goHome');
+        return;
+      }
+      stopActiveSession();
+    }
+
+    function fmtMMSS(totalSec) {
+      return String(Math.floor(totalSec / 60)).padStart(2, '0') + ':' + String(totalSec % 60).padStart(2, '0');
+    }
+
     function startAppSession(mins) {
       closeBreathModal();
       if (!activeApp) return;
 
+      if (NATIVE) {
+        gateMode = false;
+        nb('startSession', activeApp.pkg, mins);
+        refreshSession();
+        if (!nb('launchApp', activeApp.pkg)) toast("Impossible d'ouvrir " + activeApp.name);
+        return;
+      }
+
+      // Mode navigateur (simulation)
       activeApp.usedMins = (activeApp.usedMins || 0) + mins;
       const rec = getDayRec();
       rec.screenTimeHours = Number((rec.screenTimeHours + (mins / 60)).toFixed(2));
       saveState(); renderToday(); renderShieldApps();
 
-      const banner = document.getElementById('active-session-banner');
-      banner.classList.remove('hidden');
+      document.getElementById('active-session-banner').classList.remove('hidden');
       document.getElementById('banner-app-name').textContent = activeApp.name;
 
       sessionRemainingSec = mins * 60;
       if (sessionTimer) clearInterval(sessionTimer);
-
       sessionTimer = setInterval(() => {
         sessionRemainingSec--;
-        const m = String(Math.floor(sessionRemainingSec / 60)).padStart(2, '0');
-        const s = String(sessionRemainingSec % 60).padStart(2, '0');
-        document.getElementById('banner-countdown').textContent = `${m}:${s}`;
-
+        document.getElementById('banner-countdown').textContent = fmtMMSS(Math.max(0, sessionRemainingSec));
         if (sessionRemainingSec <= 0) {
           clearInterval(sessionTimer);
           alert(`⏳ Temps écoulé sur ${activeApp.name} (${mins} min). Retour au sas de respiration !`);
@@ -806,43 +971,160 @@
       }, 1000);
     }
 
-    function closeBreathModal() {
-      if (breathTimer) clearInterval(breathTimer);
-      document.getElementById('breath-modal').classList.add('hidden');
+    // Bandeau de session active (natif : lit la session stockée par le service)
+    function refreshSession() {
+      if (!NATIVE) return;
+      if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
+      const banner = document.getElementById('active-session-banner');
+      const s = nbJson('getSession');
+      if (!s) { banner.classList.add('hidden'); sessionPkg = null; return; }
+      sessionPkg = s.pkg;
+      const app = state.shieldApps.find(a => a.pkg === s.pkg);
+      document.getElementById('banner-app-name').textContent = app ? app.name : s.pkg;
+      banner.classList.remove('hidden');
+      const tick = () => {
+        const rem = Math.max(0, Math.round((s.endsAt - Date.now()) / 1000));
+        document.getElementById('banner-countdown').textContent = fmtMMSS(rem);
+        if (rem <= 0) { clearInterval(sessionTimer); sessionTimer = null; banner.classList.add('hidden'); }
+      };
+      tick();
+      sessionTimer = setInterval(tick, 1000);
     }
 
     function stopActiveSession() {
-      if (sessionTimer) clearInterval(sessionTimer);
+      if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
       document.getElementById('active-session-banner').classList.add('hidden');
       document.documentElement.classList.remove('grayscale-active');
+      if (NATIVE && sessionPkg) { nb('endSession', sessionPkg); sessionPkg = null; }
       activeApp = null;
     }
 
-    // --- 6. PARAMÈTRES & RÉGLAGES ANDROID NATIFS ---
-    function openAndroidSettings(type) {
-      if (type === 'usage') {
-        // Redirige directement vers les paramètres d'accès aux données d'utilisation du téléphone
-        try { window.location.href = "intent://#Intent;action=android.settings.USAGE_ACCESS_SETTINGS;end"; } catch(e) { alert("Ouvre les Paramètres > Applications > Accès spécial > Accès aux données d'utilisation."); }
-      } else if (type === 'overlay') {
-        try { window.location.href = "intent://#Intent;action=android.settings.action.MANAGE_OVERLAY_PERMISSION;end"; } catch(e) { alert("Ouvre les Paramètres > Applications > Accès spécial > Affichage par-dessus les autres applications."); }
+    // Appelé par le service natif : une app surveillée vient de s'ouvrir sans session valide
+    window.__nativeIntent = function () {
+      if (!NATIVE) return;
+      const it = nbJson('consumeIntent');
+      if (!it) return;
+      if (it.gate) {
+        const app = state.shieldApps.find(a => a.pkg === it.gate);
+        if (app) {
+          closeMorningModal();
+          document.getElementById('presets-modal').classList.add('hidden');
+          document.getElementById('apps-modal').classList.add('hidden');
+          activeApp = app; gateMode = true;
+          openBreathModal(app);
+        }
       }
+      if (it.open === 'morning') openMorningModal();
+    };
+
+    window.__onNativeResume = function () {
+      refreshPermissions();
+      syncAndroidUsageStats();
+      refreshSession();
+      window.__nativeIntent();
+    };
+
+    // Bouton retour Android : true = géré par la page
+    window.__onBack = function () {
+      if (!document.getElementById('breath-modal').classList.contains('hidden')) { declineGate(); return true; }
+      if (!document.getElementById('apps-modal').classList.contains('hidden')) { closeAppPicker(); return true; }
+      if (!document.getElementById('presets-modal').classList.contains('hidden')) { closePresetsModal(); return true; }
+      if (!document.getElementById('morning-modal').classList.contains('hidden')) { closeMorningModal(); return true; }
+      if (document.getElementById('tab-today').classList.contains('hidden')) { switchTab('today'); return true; }
+      return false;
+    };
+
+    // --- 6. PERMISSIONS & RÉGLAGES ANDROID NATIFS ---
+    let perms = { usage: false, overlay: false, notif: false, battery: false, secure: false };
+    const ADB_CMD = 'adb shell pm grant com.cosmos.shield android.permission.WRITE_SECURE_SETTINGS';
+
+    function refreshPermissions() {
+      if (NATIVE) {
+        const p = nbJson('getPermissions');
+        if (p) perms = p;
+      }
+      renderPermissions();
+    }
+
+    function renderPermissions() {
+      ['usage', 'overlay', 'notif', 'battery', 'secure'].forEach(k => {
+        const badge = document.getElementById('perm-' + k);
+        if (!badge) return;
+        const ok = !!perms[k];
+        badge.textContent = !NATIVE ? 'App Android' : ok ? 'Activé' : (k === 'secure' ? 'Optionnel' : 'À activer');
+        badge.className = 'text-[10px] px-2 py-0.5 rounded-full border font-mono-num ' +
+          (!NATIVE ? 'bg-slate-900 text-slate-400 border-slate-700'
+            : ok ? 'bg-emerald-950 text-emerald-300 border-emerald-700/50'
+            : k === 'secure' ? 'bg-slate-900 text-slate-300 border-slate-700'
+            : 'bg-rose-950 text-rose-300 border-rose-700/50');
+      });
+      const critical = NATIVE && !(perms.usage && perms.overlay);
+      const dot = document.getElementById('settings-dot');
+      if (dot) dot.className = 'w-2 h-2 rounded-full absolute top-1.5 right-1.5 ' + (critical ? 'bg-amber-400' : 'bg-emerald-400');
+      const warn = document.getElementById('shield-warning');
+      if (warn) warn.classList.toggle('hidden', !critical);
+    }
+
+    function openAndroidSettings(type) {
+      if (!NATIVE) { toast("Disponible uniquement dans l'app Android"); return; }
+      nb('openSettings', type);
     }
 
     function requestAppNotifications() {
+      if (NATIVE) { nb('requestNotifications'); return; }
       if ('Notification' in window) {
         Notification.requestPermission().then(perm => {
-          if (perm === 'granted') alert('Notifications activées avec succès ! Couvre-feu à 21h30 et bilan matinal prêts.');
+          if (perm === 'granted') toast('Notifications activées');
         });
       }
     }
 
+    function copyAdb() {
+      if (NATIVE) nb('copyText', ADB_CMD);
+      else if (navigator.clipboard) navigator.clipboard.writeText(ADB_CMD);
+      toast('Commande copiée');
+    }
+
+    function restoreColors() {
+      if (!NATIVE) return;
+      nb('restoreColors');
+      toast('Couleurs rétablies');
+    }
+
+    // Temps d'écran RÉEL lu via UsageStatsManager
+    function syncAndroidUsageStats() {
+      const status = document.getElementById('screentime-status');
+      if (!NATIVE) {
+        status.textContent = "Mode navigateur : temps d'écran simulé. Installe l'app Android pour la mesure réelle.";
+        return;
+      }
+      const p = nbJson('getPermissions');
+      if (p) { perms = p; renderPermissions(); }
+      if (!perms.usage) {
+        status.innerHTML = '⚠️ Accès aux données d\'utilisation requis — <span class="underline text-purple-300" onclick="openAndroidSettings(\'usage\')">activer</span>';
+        return;
+      }
+      const u = nbJson('getUsage');
+      if (!u) return;
+      const rec = getDayRec();
+      rec.screenTimeHours = Number((u.totalMin / 60).toFixed(2));
+      state.shieldApps.forEach(a => { if (a.pkg) a.usedMins = (u.perApp && u.perApp[a.pkg]) || 0; });
+      saveState();
+      renderToday();
+      if (!document.getElementById('tab-shield').classList.contains('hidden')) renderShieldApps();
+      if (!document.getElementById('tab-grids').classList.contains('hidden')) renderGrids();
+      status.textContent = 'Mesuré par Android • mis à jour à ' + new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Navigateur uniquement (dans l'app Android, ce sont les alarmes natives qui notifient)
+    let lastNotifKey = '';
     function checkAutoNotifications(now) {
-      const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-      const key = getDateKey(now);
-      if (hhmm === '21:30') {
-        if ('Notification' in window && Notification.permission === 'granted') {
-          new Notification('🌙 21h30 — Couvre-feu Digital', 'Pose ton téléphone, passe en mode nuit et prends ton livre avant de dormir.');
-        }
+      if (NATIVE) return;
+      const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const key = getDateKey(now) + hhmm;
+      if (hhmm === '21:30' && key !== lastNotifKey && 'Notification' in window && Notification.permission === 'granted') {
+        lastNotifKey = key;
+        new Notification('🌙 21h30 — Couvre-feu Digital', { body: 'Pose ton téléphone, passe en mode nuit et prends ton livre avant de dormir.' });
       }
     }
 
@@ -930,7 +1212,7 @@
       getDayRec().sleepHours = sleep;
 
       const sleepHabit = state.habits.find(h => h.id === 'hab_sleep' || h.name.toLowerCase().includes('sommeil'));
-      if (sleepHabit && sleep >= 8) getDayRec().completedHabits.push(sleepHabit.id);
+      if (sleepHabit && sleep >= 8 && !getDayRec().completedHabits.includes(sleepHabit.id)) getDayRec().completedHabits.push(sleepHabit.id);
 
       const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
       const yRec = getDayRec(getDateKey(yesterday));
@@ -947,10 +1229,14 @@
       if (confirm('Tout effacer et remettre à zéro ?')) {
         localStorage.removeItem(STORAGE_KEY);
         state = { habits: [], detox: [], history: {}, shieldApps: JSON.parse(JSON.stringify(DEFAULT_APPS)) };
+        pushShieldConfig();
+        if (NATIVE) { stopActiveSession(); }
         renderToday(); renderGrids(); renderShieldApps();
         switchTab('today');
       }
     }
+
+    function openSettingsModal() { switchTab('settings'); }
 
     function switchTab(tab) {
       ['today', 'grids', 'shield', 'settings'].forEach(t => {
@@ -959,13 +1245,20 @@
         btn.className = t === tab ? 'flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-purple-400 font-semibold transition' : 'flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-500 font-medium transition';
       });
       if (tab === 'grids') renderGrids();
-      if (tab === 'shield') renderShieldApps();
+      if (tab === 'shield') { if (NATIVE) loadInstalledApps(); renderShieldApps(); }
+      if (tab === 'settings') refreshPermissions();
       lucide.createIcons();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('add-app-web').classList.toggle('hidden', NATIVE);
+      document.getElementById('add-app-native').classList.toggle('hidden', !NATIVE);
+      if (NATIVE) { loadInstalledApps(); pushShieldConfig(); }
       updateClock(); setInterval(updateClock, 1000);
       renderToday(); renderGrids(); renderShieldApps();
+      refreshPermissions(); syncAndroidUsageStats(); refreshSession();
+      window.__nativeIntent();
+      setInterval(() => { if (NATIVE && !document.hidden) syncAndroidUsageStats(); }, 30000);
       lucide.createIcons();
     });
   </script>
