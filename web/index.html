@@ -6,7 +6,7 @@
   <meta name="theme-color" id="meta-theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>CosmosShield</title>
+  <title>Cosmos Shield</title>
 
   <link rel="stylesheet" href="app.css" />
   <script src="lucide.min.js"></script>
@@ -14,8 +14,8 @@
   <style>
     @font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('fonts/inter-latin-wght-normal.woff2') format('woff2'); }
     @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 100 800; font-display: swap; src: url('fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2'); }
-    * { -webkit-tap-highlight-color: transparent; user-select: none; }
-    body { font-family: 'Inter', sans-serif; overscroll-behavior-y: none; margin: 0; transition: background-color 0.3s, color 0.3s; }
+    * { -webkit-tap-highlight-color: transparent; user-select: none; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; overscroll-behavior-y: none; margin: 0; transition: background-color 0.25s ease, color 0.25s ease; }
     .font-mono-num { font-family: 'JetBrains Mono', monospace; }
     input, textarea, select, .select-text { -webkit-user-select: text; user-select: text; }
     button:disabled { pointer-events: none; }
@@ -23,387 +23,393 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* ===== CSS CUSTOM PROPERTIES: THEME SYSTEM ===== */
-    :root {
+    /* ============================================================
+       CSS VARIABLES : SYSTÈME DE THÈMES (4 THÈMES × SOMBRE / CLAIR)
+       ============================================================ */
+
+    /* 1. COSMIC SOMBRE (DÉFAUT ORIGINAL) */
+    :root, [data-theme="cosmic"][data-mode="dark"] {
       --cs-bg: #000000;
       --cs-bg-subtle: #050211;
-      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(124,58,237,0.25) 0%, transparent 55%),
-        radial-gradient(circle at 90% 35%, rgba(147,51,234,0.15) 0%, transparent 45%),
-        radial-gradient(circle at 10% 80%, rgba(88,28,135,0.18) 0%, transparent 50%);
-      --cs-card: rgba(9,7,16,0.9);
-      --cs-card-solid: #0d0a17;
-      --cs-card-border: rgba(139,92,246,0.22);
-      --cs-card-shadow: 0 4px 25px -4px rgba(0,0,0,0.9), 0 0 15px -5px rgba(139,92,246,0.15);
-      --cs-header: rgba(0,0,0,0.9);
-      --cs-header-border: rgba(88,28,135,0.3);
-      --cs-nav: rgba(0,0,0,0.95);
-      --cs-nav-border: rgba(88,28,135,0.4);
+      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(124,58,237,0.28) 0%, transparent 55%),
+        radial-gradient(circle at 90% 35%, rgba(147,51,234,0.18) 0%, transparent 45%),
+        radial-gradient(circle at 10% 80%, rgba(88,28,135,0.2) 0%, transparent 50%);
+      --cs-card: rgba(13,10,24,0.88);
+      --cs-card-solid: #0d0a18;
+      --cs-card-border: rgba(139,92,246,0.25);
+      --cs-card-shadow: 0 4px 25px -4px rgba(0,0,0,0.9), 0 0 15px -5px rgba(139,92,246,0.2);
+      --cs-header: rgba(5,2,14,0.92);
+      --cs-header-border: rgba(139,92,246,0.22);
+      --cs-nav: rgba(5,2,14,0.95);
+      --cs-nav-border: rgba(139,92,246,0.25);
       --cs-text: #f8fafc;
-      --cs-text-sub: #94a3b8;
-      --cs-text-dim: #64748b;
+      --cs-text-sub: #cbd5e1;
+      --cs-text-dim: #94a3b8;
       --cs-accent: #9333EA;
-      --cs-accent-light: #c4b5fd;
+      --cs-accent-light: #c084fc;
       --cs-accent-lighter: #e9d5ff;
       --cs-accent-dark: #581c87;
-      --cs-accent-bg: rgba(88,28,135,0.5);
-      --cs-accent-border: rgba(139,92,246,0.4);
+      --cs-accent-bg: rgba(147,51,234,0.15);
+      --cs-accent-border: rgba(168,85,247,0.35);
       --cs-accent2: #d946ef;
-      --cs-input-bg: rgba(0,0,0,0.8);
-      --cs-input-border: rgba(88,28,135,0.5);
-      --cs-modal-bg: rgba(0,0,0,0.9);
-      --cs-modal-card: #07050e;
-      --cs-grid-empty: #0c0a14;
-      --cs-grid-empty-border: rgba(88,28,135,0.4);
-      --cs-badge-bg: rgba(88,28,135,0.5);
-      --cs-badge-border: rgba(139,92,246,0.4);
+      --cs-input-bg: rgba(10,7,20,0.85);
+      --cs-input-border: rgba(139,92,246,0.3);
+      --cs-modal-bg: rgba(0,0,0,0.85);
+      --cs-modal-card: #0c081a;
+      --cs-grid-empty: #0e091c;
+      --cs-grid-empty-border: rgba(139,92,246,0.18);
+      --cs-badge-bg: rgba(147,51,234,0.18);
+      --cs-badge-border: rgba(168,85,247,0.35);
       --cs-success: #10b981;
-      --cs-success-text: #6ee7b7;
-      --cs-success-bg: rgba(6,78,59,0.3);
-      --cs-success-border: rgba(6,78,59,0.5);
+      --cs-success-text: #34d399;
+      --cs-success-bg: rgba(16,185,129,0.15);
+      --cs-success-border: rgba(16,185,129,0.35);
       --cs-danger: #f43f5e;
-      --cs-danger-text: #fda4af;
-      --cs-danger-bg: rgba(76,5,25,0.3);
-      --cs-danger-border: rgba(159,18,57,0.5);
+      --cs-danger-text: #fb7185;
+      --cs-danger-bg: rgba(244,63,94,0.15);
+      --cs-danger-border: rgba(244,63,94,0.35);
       --cs-warn: #f59e0b;
-      --cs-warn-text: #fcd34d;
-      --cs-main-container-border: rgba(88,28,135,0.3);
-      --cs-main-container-bg: rgba(0,0,0,0.4);
-      --cs-title-gradient: linear-gradient(to right, #fff, #e9d5ff, #f0abfc);
+      --cs-warn-text: #fbbf24;
+      --cs-main-container-border: rgba(139,92,246,0.2);
+      --cs-main-container-bg: rgba(0,0,0,0.45);
+      --cs-title-gradient: linear-gradient(to right, #ffffff, #e9d5ff, #f0abfc);
     }
 
-    /* ---- COSMIC LIGHT ---- */
+    /* 1-BIS. COSMIC CLAIR */
     [data-theme="cosmic"][data-mode="light"] {
-      --cs-bg: #f5f0ff;
-      --cs-bg-subtle: #ede5ff;
-      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(124,58,237,0.08) 0%, transparent 55%),
-        radial-gradient(circle at 90% 35%, rgba(147,51,234,0.06) 0%, transparent 45%),
-        radial-gradient(circle at 10% 80%, rgba(88,28,135,0.07) 0%, transparent 50%);
-      --cs-card: rgba(255,255,255,0.85);
+      --cs-bg: #f8f5ff;
+      --cs-bg-subtle: #efe8ff;
+      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(124,58,237,0.1) 0%, transparent 55%),
+        radial-gradient(circle at 90% 35%, rgba(147,51,234,0.08) 0%, transparent 45%),
+        radial-gradient(circle at 10% 80%, rgba(88,28,135,0.08) 0%, transparent 50%);
+      --cs-card: rgba(255,255,255,0.92);
       --cs-card-solid: #ffffff;
-      --cs-card-border: rgba(139,92,246,0.25);
-      --cs-card-shadow: 0 2px 12px -2px rgba(139,92,246,0.12);
-      --cs-header: rgba(245,240,255,0.92);
-      --cs-header-border: rgba(139,92,246,0.2);
-      --cs-nav: rgba(245,240,255,0.95);
-      --cs-nav-border: rgba(139,92,246,0.2);
+      --cs-card-border: rgba(139,92,246,0.28);
+      --cs-card-shadow: 0 4px 20px -2px rgba(124,58,237,0.1);
+      --cs-header: rgba(248,245,255,0.94);
+      --cs-header-border: rgba(139,92,246,0.22);
+      --cs-nav: rgba(248,245,255,0.96);
+      --cs-nav-border: rgba(139,92,246,0.22);
       --cs-text: #1e1b4b;
-      --cs-text-sub: #4c4673;
-      --cs-text-dim: #7c74a3;
+      --cs-text-sub: #475569;
+      --cs-text-dim: #64748b;
       --cs-accent: #7c3aed;
       --cs-accent-light: #6d28d9;
       --cs-accent-lighter: #4c1d95;
       --cs-accent-dark: #ede9fe;
       --cs-accent-bg: rgba(124,58,237,0.1);
-      --cs-accent-border: rgba(124,58,237,0.25);
+      --cs-accent-border: rgba(124,58,237,0.3);
       --cs-accent2: #a855f7;
-      --cs-input-bg: rgba(255,255,255,0.9);
+      --cs-input-bg: rgba(255,255,255,0.95);
       --cs-input-border: rgba(139,92,246,0.3);
-      --cs-modal-bg: rgba(245,240,255,0.92);
+      --cs-modal-bg: rgba(245,240,255,0.94);
       --cs-modal-card: #ffffff;
-      --cs-grid-empty: #f0ecff;
+      --cs-grid-empty: #f1ecfc;
       --cs-grid-empty-border: rgba(139,92,246,0.2);
       --cs-badge-bg: rgba(124,58,237,0.1);
-      --cs-badge-border: rgba(124,58,237,0.25);
+      --cs-badge-border: rgba(124,58,237,0.3);
+      --cs-success: #059669;
+      --cs-success-text: #047857;
+      --cs-success-bg: rgba(16,185,129,0.12);
+      --cs-success-border: rgba(16,185,129,0.35);
+      --cs-danger: #e11d48;
+      --cs-danger-text: #be123c;
+      --cs-danger-bg: rgba(225,29,72,0.1);
+      --cs-danger-border: rgba(225,29,72,0.3);
+      --cs-warn: #d97706;
+      --cs-warn-text: #b45309;
+      --cs-main-container-border: rgba(139,92,246,0.18);
+      --cs-main-container-bg: rgba(255,255,255,0.4);
+      --cs-title-gradient: linear-gradient(to right, #1e1b4b, #6d28d9, #a855f7);
+    }
+
+    /* 2. WHITE CALM SOMBRE (ÉPURÉ NOIR / BLANC) */
+    [data-theme="calm"][data-mode="dark"] {
+      --cs-bg: #09090b;
+      --cs-bg-subtle: #121215;
+      --cs-bg-gradient: none;
+      --cs-card: rgba(20,20,24,0.92);
+      --cs-card-solid: #141418;
+      --cs-card-border: rgba(255,255,255,0.12);
+      --cs-card-shadow: 0 4px 20px -2px rgba(0,0,0,0.7);
+      --cs-header: rgba(9,9,11,0.94);
+      --cs-header-border: rgba(255,255,255,0.1);
+      --cs-nav: rgba(9,9,11,0.96);
+      --cs-nav-border: rgba(255,255,255,0.1);
+      --cs-text: #f4f4f5;
+      --cs-text-sub: #a1a1aa;
+      --cs-text-dim: #71717a;
+      --cs-accent: #fafafa;
+      --cs-accent-light: #e4e4e7;
+      --cs-accent-lighter: #ffffff;
+      --cs-accent-dark: #27272a;
+      --cs-accent-bg: rgba(255,255,255,0.08);
+      --cs-accent-border: rgba(255,255,255,0.2);
+      --cs-accent2: #a1a1aa;
+      --cs-input-bg: rgba(15,15,18,0.85);
+      --cs-input-border: rgba(255,255,255,0.15);
+      --cs-modal-bg: rgba(0,0,0,0.9);
+      --cs-modal-card: #121216;
+      --cs-grid-empty: #141418;
+      --cs-grid-empty-border: rgba(255,255,255,0.1);
+      --cs-badge-bg: rgba(255,255,255,0.08);
+      --cs-badge-border: rgba(255,255,255,0.18);
+      --cs-success: #10b981;
+      --cs-success-text: #34d399;
+      --cs-success-bg: rgba(16,185,129,0.12);
+      --cs-success-border: rgba(16,185,129,0.3);
+      --cs-danger: #f43f5e;
+      --cs-danger-text: #fb7185;
+      --cs-danger-bg: rgba(244,63,94,0.12);
+      --cs-danger-border: rgba(244,63,94,0.3);
+      --cs-warn: #e4e4e7;
+      --cs-warn-text: #fafafa;
+      --cs-main-container-border: rgba(255,255,255,0.08);
+      --cs-main-container-bg: rgba(0,0,0,0.3);
+      --cs-title-gradient: linear-gradient(to right, #fafafa, #d4d4d8);
+    }
+
+    /* 2-BIS. WHITE CALM CLAIR (PUR BLANC MODERNE) */
+    [data-theme="calm"][data-mode="light"] {
+      --cs-bg: #ffffff;
+      --cs-bg-subtle: #f4f4f5;
+      --cs-bg-gradient: none;
+      --cs-card: rgba(250,250,250,0.95);
+      --cs-card-solid: #f4f4f6;
+      --cs-card-border: rgba(0,0,0,0.1);
+      --cs-card-shadow: 0 2px 12px -2px rgba(0,0,0,0.06);
+      --cs-header: rgba(255,255,255,0.95);
+      --cs-header-border: rgba(0,0,0,0.08);
+      --cs-nav: rgba(255,255,255,0.97);
+      --cs-nav-border: rgba(0,0,0,0.08);
+      --cs-text: #09090b;
+      --cs-text-sub: #52525b;
+      --cs-text-dim: #71717a;
+      --cs-accent: #18181b;
+      --cs-accent-light: #27272a;
+      --cs-accent-lighter: #09090b;
+      --cs-accent-dark: #f4f4f5;
+      --cs-accent-bg: rgba(0,0,0,0.05);
+      --cs-accent-border: rgba(0,0,0,0.15);
+      --cs-accent2: #52525b;
+      --cs-input-bg: rgba(255,255,255,0.95);
+      --cs-input-border: rgba(0,0,0,0.15);
+      --cs-modal-bg: rgba(255,255,255,0.94);
+      --cs-modal-card: #ffffff;
+      --cs-grid-empty: #f4f4f6;
+      --cs-grid-empty-border: rgba(0,0,0,0.08);
+      --cs-badge-bg: rgba(0,0,0,0.05);
+      --cs-badge-border: rgba(0,0,0,0.12);
       --cs-success: #059669;
       --cs-success-text: #047857;
       --cs-success-bg: rgba(16,185,129,0.1);
-      --cs-success-border: rgba(16,185,129,0.3);
+      --cs-success-border: rgba(16,185,129,0.25);
       --cs-danger: #e11d48;
       --cs-danger-text: #be123c;
       --cs-danger-bg: rgba(225,29,72,0.08);
       --cs-danger-border: rgba(225,29,72,0.2);
-      --cs-warn: #d97706;
-      --cs-warn-text: #b45309;
-      --cs-main-container-border: rgba(139,92,246,0.15);
-      --cs-main-container-bg: rgba(255,255,255,0.3);
-      --cs-title-gradient: linear-gradient(to right, #1e1b4b, #6d28d9, #a855f7);
+      --cs-warn: #18181b;
+      --cs-warn-text: #27272a;
+      --cs-main-container-border: rgba(0,0,0,0.06);
+      --cs-main-container-bg: rgba(0,0,0,0.015);
+      --cs-title-gradient: linear-gradient(to right, #09090b, #3f3f46);
     }
 
-    /* ---- WHITE CALM DARK ---- */
-    [data-theme="calm"][data-mode="dark"] {
-      --cs-bg: #0a0a0a;
-      --cs-bg-subtle: #0f0f0f;
-      --cs-bg-gradient: none;
-      --cs-card: rgba(20,20,20,0.95);
-      --cs-card-solid: #141414;
-      --cs-card-border: rgba(255,255,255,0.08);
-      --cs-card-shadow: 0 2px 10px -2px rgba(0,0,0,0.5);
-      --cs-header: rgba(10,10,10,0.95);
-      --cs-header-border: rgba(255,255,255,0.06);
-      --cs-nav: rgba(10,10,10,0.97);
-      --cs-nav-border: rgba(255,255,255,0.06);
-      --cs-text: #fafafa;
-      --cs-text-sub: #a3a3a3;
-      --cs-text-dim: #737373;
-      --cs-accent: #e5e5e5;
-      --cs-accent-light: #d4d4d4;
-      --cs-accent-lighter: #f5f5f5;
-      --cs-accent-dark: #262626;
-      --cs-accent-bg: rgba(255,255,255,0.06);
-      --cs-accent-border: rgba(255,255,255,0.1);
-      --cs-accent2: #a3a3a3;
-      --cs-input-bg: rgba(0,0,0,0.6);
-      --cs-input-border: rgba(255,255,255,0.1);
-      --cs-modal-bg: rgba(0,0,0,0.92);
-      --cs-modal-card: #111111;
-      --cs-grid-empty: #141414;
-      --cs-grid-empty-border: rgba(255,255,255,0.06);
-      --cs-badge-bg: rgba(255,255,255,0.06);
-      --cs-badge-border: rgba(255,255,255,0.1);
-      --cs-success: #a3a3a3;
-      --cs-success-text: #d4d4d4;
-      --cs-success-bg: rgba(163,163,163,0.1);
-      --cs-success-border: rgba(163,163,163,0.2);
-      --cs-danger: #737373;
-      --cs-danger-text: #a3a3a3;
-      --cs-danger-bg: rgba(115,115,115,0.1);
-      --cs-danger-border: rgba(115,115,115,0.2);
-      --cs-warn: #a3a3a3;
-      --cs-warn-text: #d4d4d4;
-      --cs-main-container-border: rgba(255,255,255,0.04);
-      --cs-main-container-bg: rgba(0,0,0,0.3);
-      --cs-title-gradient: linear-gradient(to right, #fafafa, #d4d4d4);
-    }
-
-    /* ---- WHITE CALM LIGHT ---- */
-    [data-theme="calm"][data-mode="light"] {
-      --cs-bg: #ffffff;
-      --cs-bg-subtle: #fafafa;
-      --cs-bg-gradient: none;
-      --cs-card: rgba(250,250,250,0.95);
-      --cs-card-solid: #f5f5f5;
-      --cs-card-border: rgba(0,0,0,0.08);
-      --cs-card-shadow: 0 1px 6px -1px rgba(0,0,0,0.08);
-      --cs-header: rgba(255,255,255,0.95);
-      --cs-header-border: rgba(0,0,0,0.06);
-      --cs-nav: rgba(255,255,255,0.97);
-      --cs-nav-border: rgba(0,0,0,0.06);
-      --cs-text: #0a0a0a;
-      --cs-text-sub: #525252;
-      --cs-text-dim: #737373;
-      --cs-accent: #171717;
-      --cs-accent-light: #262626;
-      --cs-accent-lighter: #0a0a0a;
-      --cs-accent-dark: #f5f5f5;
-      --cs-accent-bg: rgba(0,0,0,0.04);
-      --cs-accent-border: rgba(0,0,0,0.1);
-      --cs-accent2: #525252;
-      --cs-input-bg: rgba(255,255,255,0.9);
-      --cs-input-border: rgba(0,0,0,0.12);
-      --cs-modal-bg: rgba(255,255,255,0.92);
-      --cs-modal-card: #ffffff;
-      --cs-grid-empty: #f5f5f5;
-      --cs-grid-empty-border: rgba(0,0,0,0.06);
-      --cs-badge-bg: rgba(0,0,0,0.04);
-      --cs-badge-border: rgba(0,0,0,0.08);
-      --cs-success: #404040;
-      --cs-success-text: #262626;
-      --cs-success-bg: rgba(64,64,64,0.06);
-      --cs-success-border: rgba(64,64,64,0.15);
-      --cs-danger: #525252;
-      --cs-danger-text: #404040;
-      --cs-danger-bg: rgba(82,82,82,0.06);
-      --cs-danger-border: rgba(82,82,82,0.12);
-      --cs-warn: #525252;
-      --cs-warn-text: #404040;
-      --cs-main-container-border: rgba(0,0,0,0.04);
-      --cs-main-container-bg: rgba(0,0,0,0.02);
-      --cs-title-gradient: linear-gradient(to right, #0a0a0a, #404040);
-    }
-
-    /* ---- WARRIOR DARK ---- */
+    /* 3. WARRIOR SOMBRE (LOGO COULEURS : INDIGO #3B49A2, CYAN #00C8D4, ORANGE #FF6B00, OR #F59E0B) */
     [data-theme="warrior"][data-mode="dark"] {
-      --cs-bg: #0f0d14;
-      --cs-bg-subtle: #150f1d;
-      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(245,124,32,0.12) 0%, transparent 55%),
-        radial-gradient(circle at 90% 35%, rgba(0,212,232,0.08) 0%, transparent 45%),
-        radial-gradient(circle at 10% 80%, rgba(74,85,153,0.12) 0%, transparent 50%);
-      --cs-card: rgba(20,15,29,0.92);
-      --cs-card-solid: #150f1d;
-      --cs-card-border: rgba(74,85,153,0.3);
-      --cs-card-shadow: 0 4px 20px -4px rgba(0,0,0,0.7), 0 0 12px -5px rgba(245,124,32,0.1);
-      --cs-header: rgba(15,13,20,0.95);
-      --cs-header-border: rgba(74,85,153,0.25);
-      --cs-nav: rgba(15,13,20,0.97);
-      --cs-nav-border: rgba(74,85,153,0.25);
-      --cs-text: #FFF8F0;
-      --cs-text-sub: #b8a99a;
-      --cs-text-dim: #8a7c6e;
-      --cs-accent: #F57C20;
-      --cs-accent-light: #f5a623;
+      --cs-bg: #0c0b14;
+      --cs-bg-subtle: #141120;
+      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(255,107,0,0.22) 0%, transparent 50%),
+        radial-gradient(circle at 90% 30%, rgba(0,200,212,0.18) 0%, transparent 45%),
+        radial-gradient(circle at 10% 75%, rgba(59,73,162,0.25) 0%, transparent 50%);
+      --cs-card: rgba(19,16,32,0.9);
+      --cs-card-solid: #151224;
+      --cs-card-border: rgba(59,73,162,0.38);
+      --cs-card-shadow: 0 4px 25px -4px rgba(0,0,0,0.85), 0 0 16px -4px rgba(255,107,0,0.18);
+      --cs-header: rgba(12,11,20,0.94);
+      --cs-header-border: rgba(59,73,162,0.3);
+      --cs-nav: rgba(12,11,20,0.96);
+      --cs-nav-border: rgba(59,73,162,0.3);
+      --cs-text: #fffaf4;
+      --cs-text-sub: #cbd5e1;
+      --cs-text-dim: #94a3b8;
+      --cs-accent: #FF6B00;
+      --cs-accent-light: #ff8533;
       --cs-accent-lighter: #ffd699;
-      --cs-accent-dark: #5c2d0e;
-      --cs-accent-bg: rgba(245,124,32,0.15);
-      --cs-accent-border: rgba(245,124,32,0.35);
-      --cs-accent2: #00D4E8;
-      --cs-input-bg: rgba(0,0,0,0.5);
-      --cs-input-border: rgba(74,85,153,0.35);
-      --cs-modal-bg: rgba(15,13,20,0.95);
-      --cs-modal-card: #110e18;
-      --cs-grid-empty: #130f1a;
-      --cs-grid-empty-border: rgba(74,85,153,0.2);
-      --cs-badge-bg: rgba(245,124,32,0.12);
-      --cs-badge-border: rgba(245,124,32,0.3);
-      --cs-success: #00D4E8;
-      --cs-success-text: #67e8f9;
-      --cs-success-bg: rgba(0,212,232,0.1);
-      --cs-success-border: rgba(0,212,232,0.3);
-      --cs-danger: #F57C20;
-      --cs-danger-text: #f5a623;
-      --cs-danger-bg: rgba(245,124,32,0.1);
-      --cs-danger-border: rgba(245,124,32,0.3);
-      --cs-warn: #f5a623;
-      --cs-warn-text: #ffd699;
-      --cs-main-container-border: rgba(74,85,153,0.2);
-      --cs-main-container-bg: rgba(0,0,0,0.3);
-      --cs-title-gradient: linear-gradient(to right, #FFF8F0, #f5a623, #00D4E8);
+      --cs-accent-dark: #662b00;
+      --cs-accent-bg: rgba(255,107,0,0.16);
+      --cs-accent-border: rgba(255,107,0,0.38);
+      --cs-accent2: #00C8D4;
+      --cs-input-bg: rgba(14,12,24,0.85);
+      --cs-input-border: rgba(59,73,162,0.35);
+      --cs-modal-bg: rgba(12,11,20,0.92);
+      --cs-modal-card: #141122;
+      --cs-grid-empty: #131022;
+      --cs-grid-empty-border: rgba(59,73,162,0.22);
+      --cs-badge-bg: rgba(255,107,0,0.16);
+      --cs-badge-border: rgba(255,107,0,0.35);
+      --cs-success: #00C8D4;
+      --cs-success-text: #24e1ed;
+      --cs-success-bg: rgba(0,200,212,0.14);
+      --cs-success-border: rgba(0,200,212,0.35);
+      --cs-danger: #FF6B00;
+      --cs-danger-text: #ff8533;
+      --cs-danger-bg: rgba(255,107,0,0.15);
+      --cs-danger-border: rgba(255,107,0,0.38);
+      --cs-warn: #F59E0B;
+      --cs-warn-text: #fbbf24;
+      --cs-main-container-border: rgba(59,73,162,0.25);
+      --cs-main-container-bg: rgba(0,0,0,0.4);
+      --cs-title-gradient: linear-gradient(to right, #ffffff, #FF8533, #00C8D4);
     }
 
-    /* ---- WARRIOR LIGHT ---- */
+    /* 3-BIS. WARRIOR CLAIR (BLANC CRÈME + COULEURS DU LOGO) */
     [data-theme="warrior"][data-mode="light"] {
-      --cs-bg: #FFFAF5;
-      --cs-bg-subtle: #FFF5EB;
-      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(245,124,32,0.06) 0%, transparent 55%),
-        radial-gradient(circle at 90% 35%, rgba(0,180,200,0.04) 0%, transparent 45%),
-        radial-gradient(circle at 10% 80%, rgba(74,85,153,0.05) 0%, transparent 50%);
-      --cs-card: rgba(255,255,255,0.9);
+      --cs-bg: #FCF8F2;
+      --cs-bg-subtle: #F6EDE0;
+      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(255,107,0,0.1) 0%, transparent 55%),
+        radial-gradient(circle at 90% 30%, rgba(0,200,212,0.08) 0%, transparent 45%),
+        radial-gradient(circle at 10% 75%, rgba(59,73,162,0.08) 0%, transparent 50%);
+      --cs-card: rgba(255,255,255,0.92);
       --cs-card-solid: #ffffff;
-      --cs-card-border: rgba(245,124,32,0.2);
-      --cs-card-shadow: 0 2px 10px -2px rgba(245,124,32,0.08);
-      --cs-header: rgba(255,250,245,0.95);
-      --cs-header-border: rgba(245,124,32,0.15);
-      --cs-nav: rgba(255,250,245,0.97);
-      --cs-nav-border: rgba(245,124,32,0.15);
-      --cs-text: #1a1625;
-      --cs-text-sub: #5c4d40;
-      --cs-text-dim: #8a7c6e;
-      --cs-accent: #e06610;
-      --cs-accent-light: #c45a0e;
-      --cs-accent-lighter: #7c3606;
-      --cs-accent-dark: #FFF0E0;
-      --cs-accent-bg: rgba(245,124,32,0.08);
-      --cs-accent-border: rgba(245,124,32,0.2);
-      --cs-accent2: #4A5599;
-      --cs-input-bg: rgba(255,255,255,0.9);
-      --cs-input-border: rgba(245,124,32,0.2);
-      --cs-modal-bg: rgba(255,250,245,0.95);
+      --cs-card-border: rgba(255,107,0,0.25);
+      --cs-card-shadow: 0 4px 20px -2px rgba(255,107,0,0.09);
+      --cs-header: rgba(252,248,242,0.95);
+      --cs-header-border: rgba(255,107,0,0.2);
+      --cs-nav: rgba(252,248,242,0.96);
+      --cs-nav-border: rgba(255,107,0,0.2);
+      --cs-text: #1b1524;
+      --cs-text-sub: #4a3e56;
+      --cs-text-dim: #786b85;
+      --cs-accent: #E65A00;
+      --cs-accent-light: #cc5000;
+      --cs-accent-lighter: #803200;
+      --cs-accent-dark: #FFEDE0;
+      --cs-accent-bg: rgba(255,107,0,0.1);
+      --cs-accent-border: rgba(255,107,0,0.28);
+      --cs-accent2: #3B49A2;
+      --cs-input-bg: rgba(255,255,255,0.95);
+      --cs-input-border: rgba(255,107,0,0.25);
+      --cs-modal-bg: rgba(252,248,242,0.94);
       --cs-modal-card: #ffffff;
-      --cs-grid-empty: #FFF5EB;
-      --cs-grid-empty-border: rgba(245,124,32,0.12);
-      --cs-badge-bg: rgba(245,124,32,0.08);
-      --cs-badge-border: rgba(245,124,32,0.2);
-      --cs-success: #4A5599;
-      --cs-success-text: #3d4680;
-      --cs-success-bg: rgba(74,85,153,0.08);
-      --cs-success-border: rgba(74,85,153,0.2);
-      --cs-danger: #e06610;
-      --cs-danger-text: #c45a0e;
-      --cs-danger-bg: rgba(245,124,32,0.06);
-      --cs-danger-border: rgba(245,124,32,0.15);
-      --cs-warn: #c45a0e;
-      --cs-warn-text: #7c3606;
-      --cs-main-container-border: rgba(245,124,32,0.1);
-      --cs-main-container-bg: rgba(255,255,255,0.3);
-      --cs-title-gradient: linear-gradient(to right, #1a1625, #e06610, #4A5599);
+      --cs-grid-empty: #F5EEE2;
+      --cs-grid-empty-border: rgba(255,107,0,0.18);
+      --cs-badge-bg: rgba(255,107,0,0.1);
+      --cs-badge-border: rgba(255,107,0,0.25);
+      --cs-success: #3B49A2;
+      --cs-success-text: #2d387a;
+      --cs-success-bg: rgba(59,73,162,0.1);
+      --cs-success-border: rgba(59,73,162,0.28);
+      --cs-danger: #E65A00;
+      --cs-danger-text: #b34600;
+      --cs-danger-bg: rgba(255,107,0,0.1);
+      --cs-danger-border: rgba(255,107,0,0.25);
+      --cs-warn: #D97706;
+      --cs-warn-text: #b45309;
+      --cs-main-container-border: rgba(255,107,0,0.15);
+      --cs-main-container-bg: rgba(255,255,255,0.35);
+      --cs-title-gradient: linear-gradient(to right, #1b1524, #E65A00, #3B49A2);
     }
 
-    /* ---- BLUE BLACK DARK ---- */
+    /* 4. BLUE & BLACK SOMBRE */
     [data-theme="blue"][data-mode="dark"] {
       --cs-bg: #020617;
-      --cs-bg-subtle: #0a1128;
-      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(59,130,246,0.15) 0%, transparent 55%),
-        radial-gradient(circle at 90% 35%, rgba(37,99,235,0.1) 0%, transparent 45%),
-        radial-gradient(circle at 10% 80%, rgba(30,64,175,0.12) 0%, transparent 50%);
-      --cs-card: rgba(15,23,42,0.9);
-      --cs-card-solid: #0f172a;
-      --cs-card-border: rgba(59,130,246,0.2);
-      --cs-card-shadow: 0 4px 20px -4px rgba(0,0,0,0.8), 0 0 12px -5px rgba(59,130,246,0.1);
-      --cs-header: rgba(2,6,23,0.95);
-      --cs-header-border: rgba(59,130,246,0.15);
-      --cs-nav: rgba(2,6,23,0.97);
-      --cs-nav-border: rgba(59,130,246,0.15);
-      --cs-text: #e2e8f0;
-      --cs-text-sub: #94a3b8;
-      --cs-text-dim: #64748b;
+      --cs-bg-subtle: #081128;
+      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(59,130,246,0.22) 0%, transparent 55%),
+        radial-gradient(circle at 90% 35%, rgba(37,99,235,0.15) 0%, transparent 45%),
+        radial-gradient(circle at 10% 80%, rgba(30,64,175,0.18) 0%, transparent 50%);
+      --cs-card: rgba(11,20,44,0.88);
+      --cs-card-solid: #0d1734;
+      --cs-card-border: rgba(59,130,246,0.28);
+      --cs-card-shadow: 0 4px 25px -4px rgba(0,0,0,0.85), 0 0 15px -4px rgba(59,130,246,0.2);
+      --cs-header: rgba(2,6,23,0.94);
+      --cs-header-border: rgba(59,130,246,0.22);
+      --cs-nav: rgba(2,6,23,0.96);
+      --cs-nav-border: rgba(59,130,246,0.22);
+      --cs-text: #f1f5f9;
+      --cs-text-sub: #cbd5e1;
+      --cs-text-dim: #94a3b8;
       --cs-accent: #3b82f6;
       --cs-accent-light: #60a5fa;
       --cs-accent-lighter: #93c5fd;
       --cs-accent-dark: #1e3a5f;
-      --cs-accent-bg: rgba(59,130,246,0.12);
-      --cs-accent-border: rgba(59,130,246,0.25);
-      --cs-accent2: #60a5fa;
-      --cs-input-bg: rgba(2,6,23,0.8);
-      --cs-input-border: rgba(59,130,246,0.2);
-      --cs-modal-bg: rgba(2,6,23,0.95);
-      --cs-modal-card: #0c1425;
-      --cs-grid-empty: #0f172a;
-      --cs-grid-empty-border: rgba(59,130,246,0.12);
-      --cs-badge-bg: rgba(59,130,246,0.12);
-      --cs-badge-border: rgba(59,130,246,0.25);
-      --cs-success: #22d3ee;
-      --cs-success-text: #67e8f9;
-      --cs-success-bg: rgba(34,211,238,0.1);
-      --cs-success-border: rgba(34,211,238,0.25);
+      --cs-accent-bg: rgba(59,130,246,0.15);
+      --cs-accent-border: rgba(59,130,246,0.35);
+      --cs-accent2: #06b6d4;
+      --cs-input-bg: rgba(6,13,33,0.85);
+      --cs-input-border: rgba(59,130,246,0.28);
+      --cs-modal-bg: rgba(2,6,23,0.92);
+      --cs-modal-card: #0a132c;
+      --cs-grid-empty: #0b1531;
+      --cs-grid-empty-border: rgba(59,130,246,0.18);
+      --cs-badge-bg: rgba(59,130,246,0.15);
+      --cs-badge-border: rgba(59,130,246,0.35);
+      --cs-success: #06b6d4;
+      --cs-success-text: #22d3ee;
+      --cs-success-bg: rgba(6,182,212,0.14);
+      --cs-success-border: rgba(6,182,212,0.32);
       --cs-danger: #f43f5e;
       --cs-danger-text: #fb7185;
-      --cs-danger-bg: rgba(244,63,94,0.1);
-      --cs-danger-border: rgba(244,63,94,0.25);
+      --cs-danger-bg: rgba(244,63,94,0.14);
+      --cs-danger-border: rgba(244,63,94,0.32);
       --cs-warn: #f59e0b;
       --cs-warn-text: #fbbf24;
-      --cs-main-container-border: rgba(59,130,246,0.1);
-      --cs-main-container-bg: rgba(0,0,0,0.3);
-      --cs-title-gradient: linear-gradient(to right, #e2e8f0, #60a5fa, #93c5fd);
+      --cs-main-container-border: rgba(59,130,246,0.18);
+      --cs-main-container-bg: rgba(0,0,0,0.4);
+      --cs-title-gradient: linear-gradient(to right, #ffffff, #60a5fa, #93c5fd);
     }
 
-    /* ---- BLUE BLACK LIGHT ---- */
+    /* 4-BIS. BLUE & BLACK CLAIR */
     [data-theme="blue"][data-mode="light"] {
-      --cs-bg: #f0f9ff;
-      --cs-bg-subtle: #e0f2fe;
-      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(59,130,246,0.06) 0%, transparent 55%),
-        radial-gradient(circle at 90% 35%, rgba(37,99,235,0.04) 0%, transparent 45%),
-        radial-gradient(circle at 10% 80%, rgba(30,64,175,0.05) 0%, transparent 50%);
-      --cs-card: rgba(255,255,255,0.9);
+      --cs-bg: #f0f7ff;
+      --cs-bg-subtle: #e0f0fe;
+      --cs-bg-gradient: radial-gradient(circle at 50% -10%, rgba(37,99,235,0.1) 0%, transparent 55%),
+        radial-gradient(circle at 90% 35%, rgba(59,130,246,0.08) 0%, transparent 45%),
+        radial-gradient(circle at 10% 80%, rgba(2,132,199,0.08) 0%, transparent 50%);
+      --cs-card: rgba(255,255,255,0.92);
       --cs-card-solid: #ffffff;
-      --cs-card-border: rgba(59,130,246,0.18);
-      --cs-card-shadow: 0 2px 10px -2px rgba(59,130,246,0.08);
-      --cs-header: rgba(240,249,255,0.95);
-      --cs-header-border: rgba(59,130,246,0.12);
-      --cs-nav: rgba(240,249,255,0.97);
-      --cs-nav-border: rgba(59,130,246,0.12);
+      --cs-card-border: rgba(37,99,235,0.22);
+      --cs-card-shadow: 0 4px 20px -2px rgba(37,99,235,0.08);
+      --cs-header: rgba(240,247,255,0.95);
+      --cs-header-border: rgba(37,99,235,0.18);
+      --cs-nav: rgba(240,247,255,0.96);
+      --cs-nav-border: rgba(37,99,235,0.18);
       --cs-text: #0f172a;
-      --cs-text-sub: #475569;
+      --cs-text-sub: #334155;
       --cs-text-dim: #64748b;
       --cs-accent: #2563eb;
       --cs-accent-light: #1d4ed8;
       --cs-accent-lighter: #1e40af;
       --cs-accent-dark: #dbeafe;
-      --cs-accent-bg: rgba(37,99,235,0.08);
-      --cs-accent-border: rgba(37,99,235,0.18);
-      --cs-accent2: #3b82f6;
-      --cs-input-bg: rgba(255,255,255,0.9);
-      --cs-input-border: rgba(59,130,246,0.18);
-      --cs-modal-bg: rgba(240,249,255,0.95);
+      --cs-accent-bg: rgba(37,99,235,0.1);
+      --cs-accent-border: rgba(37,99,235,0.25);
+      --cs-accent2: #0284c7;
+      --cs-input-bg: rgba(255,255,255,0.95);
+      --cs-input-border: rgba(37,99,235,0.22);
+      --cs-modal-bg: rgba(240,247,255,0.94);
       --cs-modal-card: #ffffff;
-      --cs-grid-empty: #f0f9ff;
-      --cs-grid-empty-border: rgba(59,130,246,0.1);
-      --cs-badge-bg: rgba(37,99,235,0.06);
-      --cs-badge-border: rgba(37,99,235,0.15);
-      --cs-success: #0891b2;
-      --cs-success-text: #0e7490;
-      --cs-success-bg: rgba(8,145,178,0.06);
-      --cs-success-border: rgba(8,145,178,0.18);
+      --cs-grid-empty: #e8f3fc;
+      --cs-grid-empty-border: rgba(37,99,235,0.15);
+      --cs-badge-bg: rgba(37,99,235,0.08);
+      --cs-badge-border: rgba(37,99,235,0.22);
+      --cs-success: #0284c7;
+      --cs-success-text: #0369a1;
+      --cs-success-bg: rgba(2,132,199,0.1);
+      --cs-success-border: rgba(2,132,199,0.25);
       --cs-danger: #e11d48;
       --cs-danger-text: #be123c;
-      --cs-danger-bg: rgba(225,29,72,0.06);
-      --cs-danger-border: rgba(225,29,72,0.15);
+      --cs-danger-bg: rgba(225,29,72,0.08);
+      --cs-danger-border: rgba(225,29,72,0.22);
       --cs-warn: #d97706;
       --cs-warn-text: #b45309;
-      --cs-main-container-border: rgba(37,99,235,0.08);
-      --cs-main-container-bg: rgba(255,255,255,0.3);
-      --cs-title-gradient: linear-gradient(to right, #0f172a, #2563eb, #3b82f6);
+      --cs-main-container-border: rgba(37,99,235,0.12);
+      --cs-main-container-bg: rgba(255,255,255,0.4);
+      --cs-title-gradient: linear-gradient(to right, #0f172a, #2563eb, #0284c7);
     }
 
-    /* ===== THEMED COMPONENT STYLES ===== */
+    /* ============================================================
+       STYLES GÉNÉRAUX & CLASSES SUR MESURE
+       ============================================================ */
     body {
       background-color: var(--cs-bg);
       background-image: var(--cs-bg-gradient);
@@ -412,17 +418,20 @@
     .cs-card {
       background: var(--cs-card);
       backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--cs-card-border);
       box-shadow: var(--cs-card-shadow);
     }
     .cs-header {
       background: var(--cs-header);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--cs-header-border);
     }
     .cs-nav {
       background: var(--cs-nav);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-top: 1px solid var(--cs-nav-border);
     }
     .cs-input {
@@ -433,15 +442,17 @@
     .cs-input:focus { outline: none; border-color: var(--cs-accent); }
     .cs-modal-overlay {
       background: var(--cs-modal-bg);
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
     .cs-modal-card {
       background: var(--cs-modal-card);
       border: 1px solid var(--cs-card-border);
     }
     .cs-btn-primary {
-      background: linear-gradient(to right, var(--cs-accent), var(--cs-accent2));
-      color: #fff;
+      background: linear-gradient(135deg, var(--cs-accent), var(--cs-accent2));
+      color: #ffffff;
+      font-weight: 700;
     }
     .cs-btn-subtle {
       background: var(--cs-accent-bg);
@@ -478,16 +489,18 @@
     }
     .breath-orb { transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); }
 
-    /* Day Bubble Popup */
+    /* ============================================================
+       BULLE POPUP INTERACTIVE DU JOUR (GRID MAP)
+       ============================================================ */
     #day-bubble {
       position: fixed;
-      z-index: 55;
+      z-index: 60;
       pointer-events: auto;
-      max-width: 260px;
-      animation: bubbleIn 0.2s ease-out;
+      max-width: 250px;
+      animation: bubbleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
     @keyframes bubbleIn {
-      from { opacity: 0; transform: translateY(6px) scale(0.95); }
+      from { opacity: 0; transform: translateY(6px) scale(0.96); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
     #day-bubble-arrow {
@@ -495,26 +508,27 @@
       background: var(--cs-card-solid);
       border-right: 1px solid var(--cs-card-border);
       border-bottom: 1px solid var(--cs-card-border);
-      transform: rotate(45deg);
       position: absolute;
-      bottom: -6px;
-      left: 50%;
-      margin-left: -6px;
+      pointer-events: none;
     }
 
-    /* Theme swatch buttons */
-    .theme-swatch {
-      width: 40px; height: 40px; border-radius: 12px;
-      border: 2px solid var(--cs-card-border);
-      cursor: pointer; transition: transform 0.15s, border-color 0.15s;
+    /* Sélecteur visuel de thèmes */
+    .theme-card-btn {
+      transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
     }
-    .theme-swatch:active { transform: scale(0.92); }
-    .theme-swatch.active { border-color: var(--cs-accent); box-shadow: 0 0 0 2px var(--cs-accent); }
+    .theme-card-btn:active { transform: scale(0.96); }
+    .theme-card-btn.active {
+      border-color: var(--cs-accent) !important;
+      box-shadow: 0 0 0 2px var(--cs-accent);
+    }
 
-    /* Logo in header */
-    .header-logo-img { width: 36px; height: 36px; object-fit: contain; }
+    /* Logo dans le header */
+    .header-logo-img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
 
-    /* Accent slider */
     input[type="range"] { accent-color: var(--cs-accent); }
     input[type="checkbox"] { accent-color: var(--cs-accent); }
   </style>
@@ -523,13 +537,12 @@
 
   <div class="w-full max-w-md min-h-screen flex flex-col relative pb-24" style="border-left:1px solid var(--cs-main-container-border);border-right:1px solid var(--cs-main-container-border);background:var(--cs-main-container-bg)">
 
-    <!-- EN-TÊTE FIXE -->
+    <!-- EN-TÊTE FIXE AVEC LE LOGO -->
     <header class="cs-header sticky top-0 z-30 px-4 pt-3 pb-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div id="header-icon-wrap" class="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg" style="background:linear-gradient(135deg, var(--cs-accent), var(--cs-accent2));border:1px solid var(--cs-accent-border)">
-            <img id="header-logo-img" src="logo.png" alt="CS" class="header-logo-img hidden" />
-            <i id="header-logo-icon" data-lucide="orbit" class="w-5 h-5 text-white"></i>
+          <div id="header-icon-wrap" class="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg overflow-hidden shrink-0" style="background:var(--cs-accent-bg);border:1px solid var(--cs-accent-border)">
+            <img src="logo.png" alt="Cosmos Shield" class="header-logo-img" />
           </div>
           <div>
             <div class="flex items-center gap-2">
@@ -543,7 +556,7 @@
           <button onclick="openMorningModal()" title="Bilan du matin" class="p-2 rounded-xl cs-btn-subtle" style="color:var(--cs-warn-text)">
             <i data-lucide="sun" class="w-4 h-4"></i>
           </button>
-          <button onclick="switchTab('settings')" title="Réglages" class="p-2 rounded-xl cs-btn-subtle relative">
+          <button onclick="switchTab('settings')" title="Réglages &amp; Thèmes" class="p-2 rounded-xl cs-btn-subtle relative">
             <i data-lucide="settings" class="w-4 h-4"></i>
             <span id="settings-dot" class="w-2 h-2 rounded-full absolute top-1.5 right-1.5" style="background:var(--cs-success)"></span>
           </button>
@@ -551,12 +564,12 @@
       </div>
 
       <!-- BANNIÈRE DE SESSION ACTIVE -->
-      <div id="active-session-banner" class="hidden mt-2.5 p-2.5 rounded-xl flex items-center justify-between" style="background:linear-gradient(to right, var(--cs-accent-bg), var(--cs-card));border:1px solid var(--cs-accent-border);animation:pulse 2s infinite">
+      <div id="active-session-banner" class="hidden mt-2.5 p-2.5 rounded-xl flex items-center justify-between" style="background:linear-gradient(to right, var(--cs-accent-bg), var(--cs-card));border:1px solid var(--cs-accent-border)">
         <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full" style="background:var(--cs-accent);animation:ping 1s infinite"></span>
+          <span class="w-2 h-2 rounded-full" style="background:var(--cs-accent);animation:ping 1s cubic-bezier(0,0,0.2,1) infinite"></span>
           <div>
             <p class="text-xs font-semibold" style="color:var(--cs-text)">Session : <span id="banner-app-name" class="cs-text-accent">App</span></p>
-            <p class="text-[10px] cs-text-sub">Mode Grayscale &amp; Sas actif</p>
+            <p class="text-[10px] cs-text-sub">Filtre gris &amp; Sas actif</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
@@ -613,7 +626,7 @@
               <span class="w-2 h-2 rounded-full" style="background:var(--cs-success)"></span>
               <h2 class="text-xs font-bold uppercase tracking-wider cs-text-sub">Habitudes du Jour</h2>
             </div>
-            <button onclick="openPresetsModal()" class="text-xs cs-text-accent">+ Gérer</button>
+            <button onclick="openPresetsModal()" class="text-xs cs-text-accent font-semibold">+ Gérer</button>
           </div>
           <div id="habits-container" class="space-y-2.5"></div>
         </div>
@@ -636,7 +649,7 @@
           <button onclick="changeMonth(-1)" class="p-2 rounded-xl cs-btn-subtle"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
           <div class="text-center">
             <h3 id="grid-month-title" class="text-sm font-bold capitalize" style="color:var(--cs-text)">Octobre 2026</h3>
-            <p class="text-[10px] cs-text-dim">Synchronisé sur le téléphone</p>
+            <p class="text-[10px] cs-text-dim">Clique sur un jour pour voir son bilan</p>
           </div>
           <button onclick="changeMonth(1)" class="p-2 rounded-xl cs-btn-subtle"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
         </div>
@@ -646,7 +659,7 @@
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-sm font-bold flex items-center gap-1.5 cs-text-success"><i data-lucide="flame" class="w-4 h-4"></i> Grid Map Habitudes</h3>
-              <p class="text-[11px] cs-text-dim">Gradient vert selon les objectifs accomplis chaque jour.</p>
+              <p class="text-[11px] cs-text-dim">Couleur indicative selon les objectifs accomplis.</p>
             </div>
             <span id="green-score" class="font-mono-num text-xs font-bold px-2 py-1 rounded-lg cs-badge">0%</span>
           </div>
@@ -661,7 +674,7 @@
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-sm font-bold flex items-center gap-1.5 cs-text-danger"><i data-lucide="shield-alert" class="w-4 h-4"></i> Grid Map Detox &amp; Écarts</h3>
-              <p class="text-[11px] cs-text-dim">Intensité rouge selon dépassement d'écran ou rechute.</p>
+              <p class="text-[11px] cs-text-dim">Couleur indicative selon dépassement ou rechute.</p>
             </div>
             <span id="red-score" class="font-mono-num text-xs font-bold px-2 py-1 rounded-lg cs-badge">0 écart</span>
           </div>
@@ -680,7 +693,7 @@
             Protection &amp; Sas d'Interception Android
           </h2>
           <p class="text-xs cs-text-sub leading-relaxed">
-            Choisis tes applications. À chaque ouverture : <strong style="color:var(--cs-text)">filtre gris</strong> + <strong class="cs-text-accent">Breath Gate</strong> (respiration de 6s, puis durée de 1 à 5 min avant un nouveau sas).
+            Choisis tes applications. À chaque ouverture : <strong style="color:var(--cs-text)">filtre gris transparent</strong> (sans permission ADB) + <strong class="cs-text-accent">Breath Gate</strong> (respiration de 6s, puis session de 1 à 5 min).
           </p>
         </div>
         <div id="shield-warning" class="hidden cs-card rounded-2xl p-3 flex items-center justify-between gap-3" style="border-color:var(--cs-warn)">
@@ -697,60 +710,130 @@
         </button>
       </main-tab>
 
-      <!-- ================= TAB 4 : RÉGLAGES ================= -->
+      <!-- ================= TAB 4 : RÉGLAGES, THÈMES & NOTIFICATIONS ================= -->
       <main-tab id="tab-settings" class="hidden space-y-4">
 
-        <!-- Thème -->
-        <div class="cs-card rounded-2xl p-4 space-y-3">
-          <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
-            <i data-lucide="palette" class="w-4 h-4 cs-text-accent"></i> Thème &amp; Apparence
-          </h3>
+        <!-- THÈME & APPARENCE -->
+        <div class="cs-card rounded-2xl p-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
+              <i data-lucide="palette" class="w-4 h-4 cs-text-accent"></i> Thèmes &amp; Apparence
+            </h3>
+            <span id="current-theme-badge" class="text-[10px] px-2 py-0.5 rounded-full font-mono-num cs-badge uppercase">Cosmic</span>
+          </div>
 
+          <!-- Choix de thèmes -->
           <div class="space-y-2">
-            <p class="text-[11px] font-semibold cs-text-sub">Couleur</p>
-            <div class="flex gap-2">
-              <button onclick="setTheme('cosmic')" id="swatch-cosmic" class="theme-swatch" style="background:linear-gradient(135deg,#000,#581c87,#9333EA)" title="Cosmic"></button>
-              <button onclick="setTheme('calm')" id="swatch-calm" class="theme-swatch" style="background:linear-gradient(135deg,#0a0a0a,#333,#666)" title="White Calm"></button>
-              <button onclick="setTheme('warrior')" id="swatch-warrior" class="theme-swatch" style="background:linear-gradient(135deg,#0f0d14,#4A5599,#F57C20)" title="Warrior"></button>
-              <button onclick="setTheme('blue')" id="swatch-blue" class="theme-swatch" style="background:linear-gradient(135deg,#020617,#1e3a5f,#3b82f6)" title="Blue & Black"></button>
+            <p class="text-[11px] font-semibold cs-text-sub">Palette de couleurs :</p>
+            <div class="grid grid-cols-2 gap-2.5">
+
+              <!-- Cosmic -->
+              <button onclick="setTheme('cosmic')" id="theme-btn-cosmic" class="theme-card-btn p-3 rounded-2xl text-left border flex flex-col gap-1.5" style="background:var(--cs-input-bg);border-color:var(--cs-card-border)">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold" style="color:var(--cs-text)">🌌 Cosmique</span>
+                  <div class="w-4 h-4 rounded-full" style="background:linear-gradient(135deg,#7c3aed,#d946ef)"></div>
+                </div>
+                <p class="text-[10px] cs-text-dim leading-snug">Violet, fuchsia &amp; galaxie OLED.</p>
+              </button>
+
+              <!-- White Calm -->
+              <button onclick="setTheme('calm')" id="theme-btn-calm" class="theme-card-btn p-3 rounded-2xl text-left border flex flex-col gap-1.5" style="background:var(--cs-input-bg);border-color:var(--cs-card-border)">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold" style="color:var(--cs-text)">🕊️ White Calm</span>
+                  <div class="w-4 h-4 rounded-full border border-slate-500" style="background:linear-gradient(135deg,#ffffff,#000000)"></div>
+                </div>
+                <p class="text-[10px] cs-text-dim leading-snug">Épuré, sobre noir &amp; blanc.</p>
+              </button>
+
+              <!-- Warrior -->
+              <button onclick="setTheme('warrior')" id="theme-btn-warrior" class="theme-card-btn p-3 rounded-2xl text-left border flex flex-col gap-1.5" style="background:var(--cs-input-bg);border-color:var(--cs-card-border)">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold" style="color:var(--cs-text)">⚔️ Warrior</span>
+                  <div class="w-4 h-4 rounded-full" style="background:linear-gradient(135deg,#FF6B00,#3B49A2,#00C8D4)"></div>
+                </div>
+                <p class="text-[10px] cs-text-dim leading-snug">Crème, indigo, cyan &amp; orange logo.</p>
+              </button>
+
+              <!-- Blue & Black -->
+              <button onclick="setTheme('blue')" id="theme-btn-blue" class="theme-card-btn p-3 rounded-2xl text-left border flex flex-col gap-1.5" style="background:var(--cs-input-bg);border-color:var(--cs-card-border)">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold" style="color:var(--cs-text)">🌊 Blue &amp; Black</span>
+                  <div class="w-4 h-4 rounded-full" style="background:linear-gradient(135deg,#1e3a5f,#3b82f6)"></div>
+                </div>
+                <p class="text-[10px] cs-text-dim leading-snug">Bleu profond &amp; électrique.</p>
+              </button>
+
             </div>
           </div>
 
-          <div class="space-y-2">
-            <p class="text-[11px] font-semibold cs-text-sub">Mode</p>
-            <div class="flex gap-2">
-              <button onclick="setMode('dark')" id="btn-mode-dark" class="flex-1 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cs-btn-subtle">
-                <i data-lucide="moon" class="w-3.5 h-3.5"></i> Sombre
+          <!-- Bascule Mode Sombre / Clair -->
+          <div class="space-y-2 pt-1" style="border-top:1px solid var(--cs-card-border)">
+            <p class="text-[11px] font-semibold cs-text-sub">Luminosité :</p>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="setMode('dark')" id="btn-mode-dark" class="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cs-btn-subtle transition">
+                <i data-lucide="moon" class="w-4 h-4"></i> Mode Sombre
               </button>
-              <button onclick="setMode('light')" id="btn-mode-light" class="flex-1 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cs-btn-subtle">
-                <i data-lucide="sun" class="w-3.5 h-3.5"></i> Clair
+              <button onclick="setMode('light')" id="btn-mode-light" class="py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 cs-btn-subtle transition">
+                <i data-lucide="sun" class="w-4 h-4"></i> Mode Clair
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Filtre Grayscale -->
+        <!-- FILTRE GRIS TRANSPARENT (NO ADB) -->
         <div class="cs-card rounded-2xl p-4 space-y-3">
-          <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
-            <i data-lucide="eye-off" class="w-4 h-4 cs-text-accent"></i> Filtre Gris (Overlay)
-          </h3>
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
+              <i data-lucide="eye-off" class="w-4 h-4 cs-text-accent"></i> Filtre Gris par Dessus (Overlay)
+            </h3>
+            <span id="gray-intensity-txt" class="font-mono-num text-xs font-bold px-2 py-0.5 rounded-full cs-badge">80%</span>
+          </div>
           <p class="text-xs cs-text-sub leading-relaxed">
-            Filtre transparent gris affiché par-dessus les apps surveillées pour réduire l'attrait visuel. Aucune permission spéciale ADB requise.
+            Filtre transparent désaturant affiché par-dessus les applications cibles. Utilise la permission d'affichage flottant (aucune commande ADB ni droit root requis).
           </p>
-          <div class="p-3 rounded-xl flex items-center justify-between" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
-            <span class="text-xs font-bold" style="color:var(--cs-text)">Intensité :</span>
-            <span id="gray-intensity-txt" class="font-mono-num text-sm font-bold cs-text-accent">80%</span>
+          <div class="space-y-1.5 pt-1">
+            <div class="flex justify-between text-[11px] cs-text-dim font-medium">
+              <span>Subtil (20%)</span>
+              <span>Standard (80%)</span>
+              <span>Intense (100%)</span>
+            </div>
+            <input id="gray-intensity-range" type="range" min="10" max="100" step="5" value="80" oninput="onGrayIntensityChange(this.value)" class="w-full cursor-pointer" />
           </div>
-          <input id="gray-intensity-range" type="range" min="0" max="100" step="5" value="80" oninput="onGrayIntensityChange(this.value)" class="w-full" />
-          <button onclick="restoreColors()" class="w-full py-2.5 rounded-xl cs-btn-subtle text-xs font-semibold">Rétablir les couleurs maintenant</button>
+          <button onclick="restoreColors()" class="w-full py-2.5 rounded-xl cs-btn-subtle text-xs font-semibold active:scale-98">
+            Rétablir les couleurs maintenant
+          </button>
         </div>
 
-        <!-- Permissions Android -->
+        <!-- RÉGLAGES DE NOTIFICATIONS -->
+        <div class="cs-card rounded-2xl p-4 space-y-3">
+          <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
+            <i data-lucide="bell" class="w-4 h-4 cs-text-accent"></i> Notifications &amp; Alertes
+          </h3>
+          <p class="text-xs cs-text-sub">Choisis les rappels que tu souhaites recevoir :</p>
+          <div class="space-y-2">
+            <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+              <div class="pr-3">
+                <p class="text-xs font-bold" style="color:var(--cs-text)">🌙 Couvre-feu Digital (21h30)</p>
+                <p class="text-[10px] cs-text-dim">Rappel du soir pour couper les écrans et lire un livre.</p>
+              </div>
+              <input id="notif-curfew" type="checkbox" checked onchange="saveNotifSettings()" class="w-5 h-5 cursor-pointer shrink-0" />
+            </label>
+            <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+              <div class="pr-3">
+                <p class="text-xs font-bold" style="color:var(--cs-text)">☀️ Bilan du Matin (08h00)</p>
+                <p class="text-[10px] cs-text-dim">Rappel pour enregistrer tes heures de sommeil et valider la veille.</p>
+              </div>
+              <input id="notif-morning" type="checkbox" checked onchange="saveNotifSettings()" class="w-5 h-5 cursor-pointer shrink-0" />
+            </label>
+          </div>
+        </div>
+
+        <!-- PERMISSIONS ANDROID -->
         <div class="cs-card rounded-2xl p-4 space-y-4">
           <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
             <i data-lucide="smartphone" class="w-4 h-4 cs-text-success"></i> Permissions Android
           </h3>
-          <p class="text-xs cs-text-sub leading-relaxed">Active ces accès dans les réglages système. Au retour dans l'app, le statut se met à jour tout seul.</p>
+          <p class="text-xs cs-text-sub leading-relaxed">Active ces accès dans les réglages système (un seul clic chacun). Au retour dans l'app, le statut se met à jour automatiquement.</p>
 
           <div class="space-y-2.5 text-xs">
             <div class="p-3 rounded-2xl flex items-center justify-between gap-3" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
@@ -772,7 +855,7 @@
             <div class="p-3 rounded-2xl flex items-center justify-between gap-3" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
               <div class="min-w-0">
                 <p class="font-bold flex items-center gap-2 flex-wrap" style="color:var(--cs-text)">3. Notifications <span id="perm-notif"></span></p>
-                <p class="text-[11px] cs-text-dim">Couvre-feu et bilan du matin.</p>
+                <p class="text-[11px] cs-text-dim">Autorise les rappels programmés de 21h30 et 8h.</p>
               </div>
               <button onclick="requestAppNotifications()" class="px-3 py-1.5 rounded-xl cs-btn-primary font-semibold shrink-0 text-xs">Activer</button>
             </div>
@@ -780,38 +863,14 @@
             <div class="p-3 rounded-2xl flex items-center justify-between gap-3" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
               <div class="min-w-0">
                 <p class="font-bold flex items-center gap-2 flex-wrap" style="color:var(--cs-text)">4. Batterie sans limite <span id="perm-battery"></span></p>
-                <p class="text-[11px] cs-text-dim">Empêche Android d'arrêter le bouclier en arrière-plan.</p>
+                <p class="text-[11px] cs-text-dim">Empêche Android d'arrêter le service en arrière-plan.</p>
               </div>
               <button onclick="openAndroidSettings('battery')" class="px-3 py-1.5 rounded-xl cs-btn-primary font-semibold shrink-0 text-xs">Ouvrir</button>
             </div>
           </div>
         </div>
 
-        <!-- Notifications -->
-        <div class="cs-card rounded-2xl p-4 space-y-3">
-          <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
-            <i data-lucide="bell" class="w-4 h-4 cs-text-accent"></i> Notifications
-          </h3>
-          <p class="text-xs cs-text-sub">Choisis quelles notifications tu veux recevoir.</p>
-          <div class="space-y-2">
-            <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
-              <div>
-                <p class="text-xs font-bold" style="color:var(--cs-text)">🌙 Couvre-feu (21h30)</p>
-                <p class="text-[10px] cs-text-dim">Rappel pour poser le téléphone et lire.</p>
-              </div>
-              <input id="notif-curfew" type="checkbox" checked onchange="saveNotifSettings()" class="w-5 h-5" />
-            </label>
-            <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
-              <div>
-                <p class="text-xs font-bold" style="color:var(--cs-text)">☀️ Bilan du Matin (8h00)</p>
-                <p class="text-[10px] cs-text-dim">Note ton sommeil et valide ta journée d'hier.</p>
-              </div>
-              <input id="notif-morning" type="checkbox" checked onchange="saveNotifSettings()" class="w-5 h-5" />
-            </label>
-          </div>
-        </div>
-
-        <!-- Réinitialisation -->
+        <!-- RÉINITIALISATION -->
         <div class="cs-card rounded-2xl p-4 space-y-3" style="border-color:var(--cs-danger-border)">
           <h3 class="text-sm font-bold flex items-center gap-2 cs-text-danger"><i data-lucide="rotate-ccw" class="w-4 h-4"></i> Réinitialisation Usine</h3>
           <p class="text-xs cs-text-sub">Remet tous les compteurs, habitudes et historiques à zéro (état initial vierge).</p>
@@ -839,14 +898,17 @@
 
   </div>
 
-  <!-- DAY BUBBLE POPUP -->
-  <div id="day-bubble" class="hidden">
-    <div class="cs-card rounded-2xl p-3 space-y-1.5 relative" style="background:var(--cs-card-solid);border:1px solid var(--cs-card-border)">
-      <div class="flex items-center justify-between">
-        <span id="day-bubble-title" class="text-xs font-bold" style="color:var(--cs-text)">15 Oct.</span>
-        <button onclick="hideDayBubble()" class="cs-text-dim"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+  <!-- BULLE POPUP DU JOUR (GRID MAP) -->
+  <div id="day-bubble" class="hidden" onclick="event.stopPropagation()">
+    <div class="cs-card rounded-2xl p-3.5 space-y-2 relative" style="background:var(--cs-card-solid);border:1px solid var(--cs-card-border);box-shadow:var(--cs-card-shadow)">
+      <div class="flex items-center justify-between pb-1" style="border-bottom:1px solid var(--cs-card-border)">
+        <div class="flex items-center gap-1.5">
+          <i data-lucide="calendar" class="w-3.5 h-3.5 cs-text-accent"></i>
+          <span id="day-bubble-title" class="text-xs font-bold capitalize" style="color:var(--cs-text)">15 Oct. 2026</span>
+        </div>
+        <button onclick="hideDayBubble()" class="p-1 rounded-lg cs-text-dim hover:opacity-80"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
       </div>
-      <div id="day-bubble-content" class="space-y-1 text-[11px]"></div>
+      <div id="day-bubble-content" class="space-y-1.5 text-xs"></div>
       <div id="day-bubble-arrow"></div>
     </div>
   </div>
@@ -891,7 +953,7 @@
   <div id="breath-modal" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-between p-6 text-center" style="background:var(--cs-bg)">
     <div class="w-full flex items-center justify-between pt-2">
       <span class="text-[10px] font-mono-num uppercase px-3 py-1 rounded-full cs-badge">SAS DE RESPIRATION</span>
-      <span class="text-[10px] font-mono-num px-2.5 py-1 rounded-full cs-badge">GRAYSCALE ACTIF</span>
+      <span class="text-[10px] font-mono-num px-2.5 py-1 rounded-full cs-badge">FILTRE GRIS ACTIF</span>
     </div>
 
     <div class="my-auto flex flex-col items-center space-y-8 max-w-xs">
@@ -901,9 +963,9 @@
         <p class="text-xs cs-text-dim">Respire consciemment avant de décider du temps d'utilisation.</p>
       </div>
       <div class="relative w-44 h-44 flex items-center justify-center">
-        <div id="breath-circle" class="breath-orb w-36 h-36 rounded-full flex flex-col items-center justify-center" style="background:linear-gradient(135deg, var(--cs-accent), var(--cs-accent2));box-shadow:0 0 50px var(--cs-accent-bg);border:1px solid rgba(255,255,255,0.2)">
+        <div id="breath-circle" class="breath-orb w-36 h-36 rounded-full flex flex-col items-center justify-center" style="background:linear-gradient(135deg, var(--cs-accent), var(--cs-accent2));box-shadow:0 0 50px var(--cs-accent-bg);border:1px solid rgba(255,255,255,0.25)">
           <span id="breath-phase" class="text-sm font-extrabold uppercase text-white">Inspire...</span>
-          <span id="breath-sec" class="text-2xl font-mono-num font-bold mt-1" style="color:rgba(255,255,255,0.85)">6s</span>
+          <span id="breath-sec" class="text-2xl font-mono-num font-bold mt-1 text-white">6s</span>
         </div>
       </div>
       <div id="breath-durations" class="w-full space-y-3 opacity-30 pointer-events-none transition-opacity duration-500">
@@ -919,7 +981,7 @@
     </div>
 
     <div class="w-full max-w-xs pb-2">
-      <button onclick="declineGate()" class="w-full py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-98" style="background:var(--cs-success);color:#fff">
+      <button onclick="declineGate()" class="w-full py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-98" style="background:var(--cs-success);color:#ffffff">
         ✋ J'ai fini / Fermer l'appli
       </button>
     </div>
@@ -972,7 +1034,7 @@
     </div>
   </div>
 
-  <div id="toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[60] max-w-[90%] px-4 py-2 rounded-xl cs-card text-xs text-center shadow-lg" style="color:var(--cs-text)"></div>
+  <div id="toast" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-[70] max-w-[90%] px-4 py-2 rounded-xl cs-card text-xs text-center shadow-lg" style="color:var(--cs-text)"></div>
 
   <script>
     // --- 1. PONT NATIF ANDROID (AndroidBridge injecté par MainActivity) ---
@@ -1058,12 +1120,11 @@
       checkAutoNotifications(now);
     }
 
-    // --- 3. THÈME ---
+    // --- 3. GESTION DES THÈMES & LUMINOSITÉ ---
     function initTheme() {
       const t = localStorage.getItem(THEME_KEY) || 'cosmic';
       const m = localStorage.getItem(MODE_KEY) || 'dark';
       applyTheme(t, m);
-      // Load grayscale intensity from native
       if (NATIVE) {
         const v = nb('getGrayscaleIntensity');
         if (v) {
@@ -1071,7 +1132,6 @@
           document.getElementById('gray-intensity-txt').textContent = v + '%';
         }
       }
-      // Load notification settings
       loadNotifSettings();
     }
 
@@ -1090,52 +1150,52 @@
       localStorage.setItem(THEME_KEY, theme);
       localStorage.setItem(MODE_KEY, mode);
 
-      // Update theme swatches
-      document.querySelectorAll('.theme-swatch').forEach(el => el.classList.remove('active'));
-      const sw = document.getElementById('swatch-' + theme);
-      if (sw) sw.classList.add('active');
+      // Met à jour les boutons de sélection de thèmes
+      ['cosmic', 'calm', 'warrior', 'blue'].forEach(k => {
+        const btn = document.getElementById('theme-btn-' + k);
+        if (btn) btn.classList.toggle('active', k === theme);
+      });
 
-      // Update mode buttons
+      const badge = document.getElementById('current-theme-badge');
+      if (badge) {
+        const names = { cosmic: 'Cosmique', calm: 'White Calm', warrior: 'Warrior', blue: 'Blue & Black' };
+        badge.textContent = (names[theme] || theme) + ' • ' + (mode === 'dark' ? 'Sombre' : 'Clair');
+      }
+
+      // Boutons mode
       const bd = document.getElementById('btn-mode-dark');
       const bl = document.getElementById('btn-mode-light');
       if (mode === 'dark') {
-        bd.style.background = 'var(--cs-accent)'; bd.style.color = '#fff'; bd.style.borderColor = 'var(--cs-accent)';
+        bd.style.background = 'var(--cs-accent)'; bd.style.color = '#ffffff'; bd.style.borderColor = 'var(--cs-accent)';
         bl.style.background = ''; bl.style.color = ''; bl.style.borderColor = '';
       } else {
-        bl.style.background = 'var(--cs-accent)'; bl.style.color = '#fff'; bl.style.borderColor = 'var(--cs-accent)';
+        bl.style.background = 'var(--cs-accent)'; bl.style.color = '#ffffff'; bl.style.borderColor = 'var(--cs-accent)';
         bd.style.background = ''; bd.style.color = ''; bd.style.borderColor = '';
       }
 
-      // Logo: show image in Warrior theme, icon otherwise
-      const logoImg = document.getElementById('header-logo-img');
-      const logoIcon = document.getElementById('header-logo-icon');
-      if (theme === 'warrior') {
-        logoImg.classList.remove('hidden');
-        logoIcon.classList.add('hidden');
-      } else {
-        logoImg.classList.add('hidden');
-        logoIcon.classList.remove('hidden');
-      }
-
-      // Update meta theme color
+      // Meta theme-color
       const meta = document.getElementById('meta-theme-color');
       const cs = getComputedStyle(document.documentElement);
       meta.content = cs.getPropertyValue('--cs-bg').trim();
 
+      // Si l'onglet Grilles est ouvert, rafraîchit pour ajuster les couleurs
+      if (!document.getElementById('tab-grids').classList.contains('hidden')) renderGrids();
+
       lucide.createIcons();
     }
 
-    // --- 4. GRAYSCALE INTENSITY ---
+    // --- 4. INTENSITÉ DU FILTRE GRIS (OVERLAY SANS ADB) ---
     function onGrayIntensityChange(val) {
       document.getElementById('gray-intensity-txt').textContent = val + '%';
       if (NATIVE) nb('setGrayscaleIntensity', parseInt(val));
     }
     function restoreColors() {
       if (NATIVE) nb('restoreColors');
+      document.documentElement.classList.remove('grayscale-active');
       toast('Couleurs rétablies');
     }
 
-    // --- 5. NOTIFICATION SETTINGS ---
+    // --- 5. RÉGLAGES DE NOTIFICATIONS ---
     function loadNotifSettings() {
       if (NATIVE) {
         const s = nbJson('getNotifSettings');
@@ -1143,6 +1203,15 @@
           document.getElementById('notif-curfew').checked = s.curfew !== false;
           document.getElementById('notif-morning').checked = s.morning !== false;
         }
+      } else {
+        try {
+          const raw = localStorage.getItem('cs_notif_prefs');
+          if (raw) {
+            const p = JSON.parse(raw);
+            document.getElementById('notif-curfew').checked = p.curfew !== false;
+            document.getElementById('notif-morning').checked = p.morning !== false;
+          }
+        } catch(e) {}
       }
     }
     function saveNotifSettings() {
@@ -1150,11 +1219,13 @@
       const morning = document.getElementById('notif-morning').checked;
       if (NATIVE) {
         nb('setNotifSettings', JSON.stringify({ curfew, morning }));
+      } else {
+        localStorage.setItem('cs_notif_prefs', JSON.stringify({ curfew, morning }));
       }
-      toast('Notifications mises à jour');
+      toast('Préférences de notifications enregistrées');
     }
 
-    // --- 6. RENDU DU JOUR ---
+    // --- 6. RENDU DE L'ONGLET AUJOURD'HUI ---
     function renderToday() {
       const todayKey = getDateKey();
       const rec = getDayRec(todayKey);
@@ -1183,11 +1254,11 @@
         hBox.innerHTML += `
           <div onclick="toggleHabit('${habit.id}')" class="cs-card rounded-2xl p-3.5 flex items-center justify-between cursor-pointer transition ${done ? 'cs-bg-success' : ''}">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl flex items-center justify-center border ${done ? '' : ''}" style="background:${done ? 'var(--cs-success)' : 'var(--cs-accent-bg)'};color:${done ? '#000' : 'var(--cs-accent-light)'};border-color:${done ? 'var(--cs-success)' : 'var(--cs-accent-border)'}">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center border" style="background:${done ? 'var(--cs-success)' : 'var(--cs-accent-bg)'};color:${done ? '#ffffff' : 'var(--cs-accent-light)'};border-color:${done ? 'var(--cs-success)' : 'var(--cs-accent-border)'}">
                 <i data-lucide="${done ? 'check' : (habit.icon || 'star')}" class="w-5 h-5"></i>
               </div>
               <div>
-                <h3 class="text-sm font-bold ${done ? 'line-through' : ''}" style="color:${done ? 'var(--cs-success-text)' : 'var(--cs-text)'}"> ${habit.name}</h3>
+                <h3 class="text-sm font-bold ${done ? 'line-through opacity-80' : ''}" style="color:${done ? 'var(--cs-success-text)' : 'var(--cs-text)'}">${habit.name}</h3>
                 <p class="text-[11px] cs-text-dim">${habit.target}</p>
               </div>
             </div>
@@ -1283,8 +1354,8 @@
       });
     }
 
-    // --- 7. GRILLES MOIS (VERTE & ROUGE) + BUBBLE ---
-    function changeMonth(dir) { monthOffset += dir; renderGrids(); }
+    // --- 7. GRILLES MOIS INDICATIVES & BULLE DE DÉTAIL ---
+    function changeMonth(dir) { monthOffset += dir; hideDayBubble(); renderGrids(); }
 
     function renderGrids() {
       const now = new Date();
@@ -1319,7 +1390,7 @@
         const rec = state.history[key];
         const isToday = key === todayKey;
 
-        // Green grid
+        // Grille Verte (Habitudes)
         let ratio = 0;
         if (rec && totalH > 0) ratio = rec.completedHabits.filter(id => state.habits.some(h => h.id === id)).length / totalH;
         if (dObj <= now && totalH > 0) { sumRatio += ratio; countD++; }
@@ -1329,12 +1400,12 @@
         let gText = 'var(--cs-text-dim)';
         let gExtra = '';
         if (ratio > 0 && ratio <= 0.34) { gBg = '#064e3b'; gText = '#a7f3d0'; gBorder = '#065f46'; }
-        else if (ratio > 0.34 && ratio <= 0.67) { gBg = '#059669'; gText = '#fff'; gBorder = '#10b981'; }
-        else if (ratio >= 1) { gBg = '#34d399'; gText = '#000'; gBorder = '#34d399'; gExtra = 'font-weight:800;box-shadow:0 0 10px rgba(52,211,153,0.65)'; }
+        else if (ratio > 0.34 && ratio <= 0.67) { gBg = '#059669'; gText = '#ffffff'; gBorder = '#10b981'; }
+        else if (ratio >= 1) { gBg = '#10b981'; gText = '#ffffff'; gBorder = '#34d399'; gExtra = 'font-weight:800;box-shadow:0 0 10px rgba(16,185,129,0.55)'; }
 
-        gGrid.innerHTML += `<button onclick="showDayBubble('${key}',this,'green')" class="h-9 rounded-xl text-xs font-mono-num flex items-center justify-center ${isToday ? 'ring-2' : ''}" style="background:${gBg};border:1px solid ${gBorder};color:${gText};${gExtra};${isToday ? '--tw-ring-color:var(--cs-accent)' : ''}">${day}</button>`;
+        gGrid.innerHTML += `<button onclick="showDayBubble('${key}',this,'green',event)" class="h-9 rounded-xl text-xs font-mono-num flex items-center justify-center transition active:scale-95 ${isToday ? 'ring-2' : ''}" style="background:${gBg};border:1px solid ${gBorder};color:${gText};${gExtra};${isToday ? 'outline:2px solid var(--cs-accent);outline-offset:1px' : ''}">${day}</button>`;
 
-        // Red grid
+        // Grille Rouge (Detox & Écarts)
         let redSev = 0;
         if (rec) {
           if (rec.relapses > 0) redSev += rec.relapses * 2;
@@ -1347,90 +1418,120 @@
         let rText = 'var(--cs-text-dim)';
         let rExtra = '';
         if (redSev === 1) { rBg = '#4c0519'; rText = '#fecdd3'; rBorder = '#881337'; }
-        else if (redSev === 2) { rBg = '#9f1239'; rText = '#fff'; rBorder = '#e11d48'; }
-        else if (redSev >= 3) { rBg = '#ff2a55'; rText = '#fff'; rBorder = '#ff2a55'; rExtra = 'font-weight:800;box-shadow:0 0 12px rgba(255,42,85,0.75)'; }
+        else if (redSev === 2) { rBg = '#9f1239'; rText = '#ffffff'; rBorder = '#e11d48'; }
+        else if (redSev >= 3) { rBg = '#e11d48'; rText = '#ffffff'; rBorder = '#ff2a55'; rExtra = 'font-weight:800;box-shadow:0 0 12px rgba(225,29,72,0.6)'; }
 
-        rGrid.innerHTML += `<button onclick="showDayBubble('${key}',this,'red')" class="h-9 rounded-xl text-xs font-mono-num flex items-center justify-center ${isToday ? 'ring-2' : ''}" style="background:${rBg};border:1px solid ${rBorder};color:${rText};${rExtra};${isToday ? '--tw-ring-color:var(--cs-accent)' : ''}">${day}</button>`;
+        rGrid.innerHTML += `<button onclick="showDayBubble('${key}',this,'red',event)" class="h-9 rounded-xl text-xs font-mono-num flex items-center justify-center transition active:scale-95 ${isToday ? 'ring-2' : ''}" style="background:${rBg};border:1px solid ${rBorder};color:${rText};${rExtra};${isToday ? 'outline:2px solid var(--cs-accent);outline-offset:1px' : ''}">${day}</button>`;
       }
 
       document.getElementById('green-score').textContent = `${countD > 0 ? Math.round((sumRatio/countD)*100) : 0}% ce mois`;
-      document.getElementById('red-score').textContent = `${violations} jour(s) rouge`;
+      document.getElementById('red-score').textContent = `${violations} jour(s) écart`;
     }
 
-    // --- 8. DAY BUBBLE POPUP ---
-    function showDayBubble(key, el, type) {
+    // --- 8. BULLE FLOTTANTE SUR LE JOUR CLIQUE ---
+    function showDayBubble(key, el, type, event) {
+      if (event) event.stopPropagation();
       hideDayBubble();
+
       const rec = state.history[key];
       const bubble = document.getElementById('day-bubble');
       const content = document.getElementById('day-bubble-content');
       const title = document.getElementById('day-bubble-title');
 
-      // Format date title
       const parts = key.split('-');
-      const d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-      title.textContent = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }).format(d);
+      const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      title.textContent = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).format(d);
 
       let html = '';
-      if (!rec || (state.habits.length === 0 && state.detox.length === 0)) {
-        html = '<p class="cs-text-dim">Aucune donnée pour ce jour.</p>';
-      } else {
-        // Habits
-        if (state.habits.length > 0) {
-          state.habits.forEach(h => {
-            const done = rec.completedHabits && rec.completedHabits.includes(h.id);
-            html += `<div class="flex items-center gap-1.5"><span style="color:${done ? 'var(--cs-success)' : 'var(--cs-danger)'}">${done ? '✅' : '❌'}</span><span class="cs-text-sub">${esc(h.name)}</span></div>`;
-          });
-        }
-        // Screen time
-        if (rec.screenTimeHours > 0) {
-          html += `<div class="flex items-center gap-1.5"><span>📱</span><span class="cs-text-sub">Écran : ${rec.screenTimeHours.toFixed(1)}h</span></div>`;
-        }
-        // Sleep
-        if (rec.sleepHours > 0) {
-          html += `<div class="flex items-center gap-1.5"><span>😴</span><span class="cs-text-sub">Sommeil : ${rec.sleepHours}h</span></div>`;
-        }
-        // Relapses
-        if (rec.relapses > 0) {
-          html += `<div class="flex items-center gap-1.5"><span>⚠️</span><span class="cs-text-sub">${rec.relapses} écart(s)</span></div>`;
-        }
-        if (html === '') html = '<p class="cs-text-dim">Aucune donnée enregistrée.</p>';
+      const totalH = state.habits.length;
+      const doneHabits = (rec && rec.completedHabits) ? rec.completedHabits : [];
+
+      // Habitudes
+      if (totalH > 0) {
+        html += '<div class="space-y-1">';
+        html += `<div class="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider cs-text-dim"><span>Habitudes (${doneHabits.length}/${totalH})</span></div>`;
+        state.habits.forEach(h => {
+          const isDone = doneHabits.includes(h.id);
+          html += `
+            <div class="flex items-center justify-between py-0.5">
+              <span class="truncate pr-2 ${isDone ? 'cs-text-sub line-through opacity-80' : 'cs-text-sub'}">${esc(h.name)}</span>
+              <span class="font-mono-num text-xs ${isDone ? 'cs-text-success font-bold' : 'cs-text-dim'}">${isDone ? '✓' : '—'}</span>
+            </div>`;
+        });
+        html += '</div>';
       }
+
+      // Métriques (Temps d'écran, Sommeil, Écarts)
+      const st = rec ? (rec.screenTimeHours || 0) : 0;
+      const sleep = rec ? (rec.sleepHours || 0) : 0;
+      const relapses = rec ? (rec.relapses || 0) : 0;
+
+      html += '<div class="pt-1.5 space-y-1 text-[11px]" style="border-top:1px solid var(--cs-card-border)">';
+      if (st > 0) {
+        const mins = Math.round(st * 60);
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        html += `<div class="flex items-center justify-between"><span class="cs-text-dim">📱 Temps d'écran</span><span class="font-mono-num font-bold cs-text-accent">${h}h ${String(m).padStart(2,'0')}m</span></div>`;
+      }
+      if (sleep > 0) {
+        html += `<div class="flex items-center justify-between"><span class="cs-text-dim">😴 Sommeil</span><span class="font-mono-num font-bold cs-text-success">${sleep}h</span></div>`;
+      }
+      if (relapses > 0) {
+        html += `<div class="flex items-center justify-between"><span class="cs-text-dim">⚠️ Écarts / rechutes</span><span class="font-mono-num font-bold cs-text-danger">${relapses}</span></div>`;
+      } else if (rec && (totalH > 0 || st > 0 || sleep > 0)) {
+        html += `<div class="flex items-center justify-between"><span class="cs-text-dim">🛡️ Bouclier detox</span><span class="font-mono-num font-bold cs-text-success">Clean (0 écart)</span></div>`;
+      }
+
+      if (totalH === 0 && st === 0 && sleep === 0 && relapses === 0) {
+        html = '<p class="text-xs cs-text-dim py-1 text-center">Aucune activité enregistrée ce jour.</p>';
+      } else {
+        html += '</div>';
+      }
+
       content.innerHTML = html;
 
-      // Position bubble above the clicked element
-      const rect = el.getBoundingClientRect();
+      // Positionnement de la bulle
       bubble.classList.remove('hidden');
-      bubble.style.left = Math.max(8, Math.min(window.innerWidth - 268, rect.left + rect.width/2 - 130)) + 'px';
-      bubble.style.top = (rect.top - bubble.offsetHeight - 8 + window.scrollY) + 'px';
+      const bWidth = 240;
+      const rect = el.getBoundingClientRect();
+      let left = rect.left + rect.width / 2 - bWidth / 2;
+      left = Math.max(12, Math.min(window.innerWidth - bWidth - 12, left));
+      bubble.style.left = left + 'px';
+      bubble.style.width = bWidth + 'px';
 
-      // If bubble goes above viewport, show below
-      if (rect.top - bubble.offsetHeight - 8 < 0) {
-        bubble.style.top = (rect.bottom + 8 + window.scrollY) + 'px';
-        const arrow = document.getElementById('day-bubble-arrow');
-        arrow.style.bottom = ''; arrow.style.top = '-6px';
+      const bHeight = bubble.offsetHeight || 135;
+      const arrow = document.getElementById('day-bubble-arrow');
+      const arrowLeft = Math.max(16, Math.min(bWidth - 16, (rect.left + rect.width / 2) - left));
+      arrow.style.left = arrowLeft + 'px';
+      arrow.style.marginLeft = '-6px';
+
+      // Affichage au-dessus ou au-dessous selon la hauteur disponible dans le viewport
+      if (rect.top - bHeight - 12 < 55) {
+        // En dessous de la case
+        bubble.style.top = (rect.bottom + 10) + 'px';
+        arrow.style.top = '-6px';
+        arrow.style.bottom = '';
         arrow.style.transform = 'rotate(-135deg)';
       } else {
-        const arrow = document.getElementById('day-bubble-arrow');
-        arrow.style.top = ''; arrow.style.bottom = '-6px';
+        // Au-dessus de la case
+        bubble.style.top = (rect.top - bHeight - 10) + 'px';
+        arrow.style.top = '';
+        arrow.style.bottom = '-6px';
         arrow.style.transform = 'rotate(45deg)';
       }
 
       lucide.createIcons();
-      // Close on click outside
-      setTimeout(() => document.addEventListener('click', closeBubbleOutside, { once: true }), 50);
-    }
-
-    function closeBubbleOutside(e) {
-      const bubble = document.getElementById('day-bubble');
-      if (!bubble.contains(e.target)) hideDayBubble();
-      else setTimeout(() => document.addEventListener('click', closeBubbleOutside, { once: true }), 50);
+      setTimeout(() => {
+        document.removeEventListener('click', hideDayBubble);
+        document.addEventListener('click', hideDayBubble, { once: true });
+      }, 50);
     }
 
     function hideDayBubble() {
       document.getElementById('day-bubble').classList.add('hidden');
     }
 
-    // --- 9. BOUCLIER D'APPS ---
+    // --- 9. BOUCLIER D'APPS (SAS DE RESPIRATION & GRAYSCALE) ---
     let installedApps = [];
     let installedPkgs = {};
     let gateMode = false;
@@ -1466,7 +1567,7 @@
             </div>
             <div class="grid grid-cols-2 gap-2 pt-1 text-xs" style="border-top:1px solid var(--cs-card-border)">
               <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
-                <span class="text-[11px] cs-text-sub">Grayscale Auto</span>
+                <span class="text-[11px] cs-text-sub">Filtre Gris Auto</span>
                 <input type="checkbox" ${app.grayscale ? 'checked' : ''} onchange="toggleAppRule('${app.id}', 'grayscale', this.checked)" class="w-4 h-4" />
               </label>
               <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
@@ -1677,6 +1778,7 @@
     };
 
     window.__onBack = function () {
+      if (!document.getElementById('day-bubble').classList.contains('hidden')) { hideDayBubble(); return true; }
       if (!document.getElementById('breath-modal').classList.contains('hidden')) { declineGate(); return true; }
       if (!document.getElementById('apps-modal').classList.contains('hidden')) { closeAppPicker(); return true; }
       if (!document.getElementById('presets-modal').classList.contains('hidden')) { closePresetsModal(); return true; }
@@ -1724,7 +1826,7 @@
       if (NATIVE) { nb('requestNotifications'); return; }
       if ('Notification' in window) {
         Notification.requestPermission().then(perm => {
-          if (perm === 'granted') toast('Notifications activées');
+          if (perm === 'granted') toast('Notifications autorisées');
         });
       }
     }
@@ -1778,7 +1880,7 @@
         hBox.innerHTML += `
           <div onclick="togglePresetHabit('${p.id}')" class="p-3 rounded-2xl flex items-center justify-between cursor-pointer" style="background:${active ? 'var(--cs-success-bg)' : 'var(--cs-input-bg)'};border:1px solid ${active ? 'var(--cs-success-border)' : 'var(--cs-input-border)'}">
             <div><p class="text-xs font-bold" style="color:var(--cs-text)">${p.name}</p><p class="text-[10px] cs-text-dim">${p.target}</p></div>
-            <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:${active ? 'var(--cs-success)' : 'var(--cs-badge-bg)'};color:${active ? '#000' : 'var(--cs-accent-light)'}">${active ? 'Activé' : 'Activer'}</span>
+            <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:${active ? 'var(--cs-success)' : 'var(--cs-badge-bg)'};color:${active ? '#ffffff' : 'var(--cs-accent-light)'}">${active ? 'Activé' : 'Activer'}</span>
           </div>
         `;
       });
@@ -1788,7 +1890,7 @@
         dBox.innerHTML += `
           <div onclick="togglePresetDetox('${p.id}')" class="p-3 rounded-2xl flex items-center justify-between cursor-pointer" style="background:${active ? 'var(--cs-danger-bg)' : 'var(--cs-input-bg)'};border:1px solid ${active ? 'var(--cs-danger-border)' : 'var(--cs-input-border)'}">
             <div><p class="text-xs font-bold" style="color:var(--cs-text)">${p.name}</p><p class="text-[10px] cs-text-dim">${p.type === 'abstinence' ? 'Compteur 0j' : 'Limite ' + p.limitHours + 'h'}</p></div>
-            <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:${active ? 'var(--cs-danger)' : 'var(--cs-badge-bg)'};color:${active ? '#fff' : 'var(--cs-accent-light)'}">${active ? 'Activé' : 'Activer'}</span>
+            <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:${active ? 'var(--cs-danger)' : 'var(--cs-badge-bg)'};color:${active ? '#ffffff' : 'var(--cs-accent-light)'}">${active ? 'Activé' : 'Activer'}</span>
           </div>
         `;
       });
@@ -1857,6 +1959,7 @@
       });
       yRec.relapses = clean ? 0 : 1;
       saveState(); closeMorningModal(); renderToday(); renderGrids();
+      toast('Bilan enregistré');
     }
 
     function factoryReset() {
@@ -1867,6 +1970,7 @@
         if (NATIVE) { stopActiveSession(); }
         renderToday(); renderGrids(); renderShieldApps();
         switchTab('today');
+        toast('Application réinitialisée');
       }
     }
 
