@@ -58,7 +58,7 @@ class ShieldService : Service() {
     override fun onDestroy() {
         exec?.shutdownNow()
         exec = null
-        Grayscale.set(this, false)
+        GrayscaleOverlay.hide(this)
         super.onDestroy()
     }
 
@@ -88,10 +88,10 @@ class ShieldService : Service() {
         updateForeground()
         val app = fg?.let { cfg[it] }
         if (app == null) {
-            Grayscale.set(this, false)
+            GrayscaleOverlay.hide(this)
             return
         }
-        Grayscale.set(this, app.grayscale)
+        if (app.grayscale) GrayscaleOverlay.show(this, Prefs.grayscaleIntensity(this)) else GrayscaleOverlay.hide(this)
 
         val now = System.currentTimeMillis()
         if (app.breathGate && !Prefs.sessionActive(this, app.pkg) && now - lastGate > 2500) {
@@ -140,7 +140,7 @@ class ShieldService : Service() {
                 try { c.startForegroundService(i) } catch (e: Exception) { /* app en arrière-plan : réessai au prochain affichage */ }
             } else {
                 c.stopService(i)
-                Grayscale.set(c, false)
+                GrayscaleOverlay.hide(c)
             }
         }
     }

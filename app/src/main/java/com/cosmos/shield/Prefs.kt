@@ -58,9 +58,18 @@ object Prefs {
         return best
     }
 
-    fun grayByUs(c: Context): Boolean = sp(c).getBoolean("gray_by_us", false)
-    fun setGrayByUs(c: Context, v: Boolean) { sp(c).edit().putBoolean("gray_by_us", v).apply() }
+
 
     fun notifAsked(c: Context): Boolean = sp(c).getBoolean("notif_asked", false)
     fun setNotifAsked(c: Context) { sp(c).edit().putBoolean("notif_asked", true).apply() }
+
+    // Grayscale overlay intensity (0-100)
+    fun grayscaleIntensity(c: Context): Int = sp(c).getInt("gray_intensity", 80)
+    fun setGrayscaleIntensity(c: Context, v: Int) { sp(c).edit().putInt("gray_intensity", v.coerceIn(0, 100)).apply() }
+
+    // Notification settings
+    fun notifCurfew(c: Context): Boolean = sp(c).getBoolean("notif_curfew", true)
+    fun setNotifCurfew(c: Context, v: Boolean) { sp(c).edit().putBoolean("notif_curfew", v).apply() }
+    fun notifMorning(c: Context): Boolean = sp(c).getBoolean("notif_morning", true)
+    fun setNotifMorning(c: Context, v: Boolean) { sp(c).edit().putBoolean("notif_morning", v).apply() }
 }

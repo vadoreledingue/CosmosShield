@@ -22,6 +22,9 @@ object Reminders {
     }
 
     fun schedule(c: Context, type: String) {
+        // Respect per-notification settings
+        if (type == NIGHT && !Prefs.notifCurfew(c)) { cancel(c, type); return }
+        if (type == MORNING && !Prefs.notifMorning(c)) { cancel(c, type); return }
         val (h, m) = if (type == NIGHT) Pair(21, 30) else Pair(8, 0)
         val cal = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, h); set(Calendar.MINUTE, m); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
@@ -30,6 +33,11 @@ object Reminders {
         val am = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         // Alarme inexacte (pas de permission spéciale) : peut dériver de quelques minutes en mode Doze.
         am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, alarmIntent(c, type))
+    }
+
+    fun cancel(c: Context, type: String) {
+        val am = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        am.cancel(alarmIntent(c, type))
     }
 
     private fun alarmIntent(c: Context, type: String): PendingIntent =

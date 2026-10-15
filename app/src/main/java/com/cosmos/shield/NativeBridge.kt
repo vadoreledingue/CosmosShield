@@ -26,7 +26,7 @@ class NativeBridge(private val act: MainActivity) {
         put("overlay", Settings.canDrawOverlays(ctx))
         put("notif", ctx.getSystemService(NotificationManager::class.java).areNotificationsEnabled())
         put("battery", ctx.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(ctx.packageName))
-        put("secure", Grayscale.canWrite(ctx))
+
     }.toString()
 
     @JavascriptInterface
@@ -133,10 +133,34 @@ class NativeBridge(private val act: MainActivity) {
     }
 
     @JavascriptInterface
-    fun restoreColors() { Grayscale.forceOff(ctx) }
+    fun restoreColors() { GrayscaleOverlay.hide(ctx) }
 
     @JavascriptInterface
     fun toast(msg: String) {
         act.runOnUiThread { Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show() }
+    }
+
+    @JavascriptInterface
+    fun getGrayscaleIntensity(): String = Prefs.grayscaleIntensity(ctx).toString()
+
+    @JavascriptInterface
+    fun setGrayscaleIntensity(intensity: Int) {
+        Prefs.setGrayscaleIntensity(ctx, intensity)
+    }
+
+    @JavascriptInterface
+    fun getNotifSettings(): String = JSONObject().apply {
+        put("curfew", Prefs.notifCurfew(ctx))
+        put("morning", Prefs.notifMorning(ctx))
+    }.toString()
+
+    @JavascriptInterface
+    fun setNotifSettings(json: String) {
+        try {
+            val o = JSONObject(json)
+            if (o.has("curfew")) Prefs.setNotifCurfew(ctx, o.getBoolean("curfew"))
+            if (o.has("morning")) Prefs.setNotifMorning(ctx, o.getBoolean("morning"))
+            Reminders.scheduleAll(ctx)
+        } catch (e: Exception) { /* invalid JSON */ }
     }
 }
