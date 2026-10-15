@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="cosmic" data-mode="dark">
+<html lang="fr" data-theme="warrior" data-mode="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -547,15 +547,11 @@
           <div>
             <div class="flex items-center gap-2">
               <h1 class="text-base font-bold tracking-tight cs-title">COSMOS SHIELD</h1>
-              <span class="text-[10px] px-1.5 py-0.5 rounded-full font-mono-num cs-badge">ANDROID v2.0</span>
             </div>
             <p id="live-system-date" class="text-[11px] font-medium capitalize cs-text-dim">Chargement...</p>
           </div>
         </div>
         <div class="flex items-center gap-1.5">
-          <button onclick="openMorningModal()" title="Bilan du matin" class="p-2 rounded-xl cs-btn-subtle" style="color:var(--cs-warn-text)">
-            <i data-lucide="sun" class="w-4 h-4"></i>
-          </button>
           <button onclick="switchTab('settings')" title="Réglages &amp; Thèmes" class="p-2 rounded-xl cs-btn-subtle relative">
             <i data-lucide="settings" class="w-4 h-4"></i>
             <span id="settings-dot" class="w-2 h-2 rounded-full absolute top-1.5 right-1.5" style="background:var(--cs-success)"></span>
@@ -584,6 +580,25 @@
 
       <!-- ================= TAB 1 : AUJOURD'HUI ================= -->
       <main-tab id="tab-today" class="space-y-5 block">
+
+        <!-- BANNIÈRE BILAN DU MATIN (affichée en haut tant que non complétée aujourd'hui) -->
+        <div id="morning-banner" class="hidden cs-card rounded-2xl p-4 flex items-center justify-between gap-3 cursor-pointer active:scale-[0.99] transition" onclick="openMorningModal()" style="border:1px solid var(--cs-warn);background:linear-gradient(135deg, rgba(245,158,11,0.12), var(--cs-card))">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.4);color:var(--cs-warn-text)">
+              <i data-lucide="sunrise" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider" style="color:var(--cs-warn-text)">Bilan du Matin</h3>
+                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded-full cs-badge" style="color:var(--cs-warn-text);border-color:rgba(245,158,11,0.35)">À REMPLIR</span>
+              </div>
+              <p class="text-xs font-semibold truncate" style="color:var(--cs-text)">Sommeil &amp; habitudes de la veille</p>
+            </div>
+          </div>
+          <button class="px-3 py-1.5 rounded-xl font-bold text-xs shrink-0 shadow-sm" style="background:var(--cs-warn);color:#ffffff">
+            Remplir
+          </button>
+        </div>
 
         <!-- Carte Temps d'Écran -->
         <div class="cs-card rounded-2xl p-4 relative overflow-hidden">
@@ -809,8 +824,18 @@
           <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
             <i data-lucide="bell" class="w-4 h-4 cs-text-accent"></i> Notifications &amp; Alertes
           </h3>
-          <p class="text-xs cs-text-sub">Choisis les rappels que tu souhaites recevoir :</p>
+          <p class="text-xs cs-text-sub">Choisis les notifications et rappels que tu souhaites recevoir :</p>
           <div class="space-y-2">
+            <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+              <div class="pr-3">
+                <p class="text-xs font-bold" style="color:var(--cs-text)">🛡️ Notification permanente du Bouclier</p>
+                <p class="text-[10px] cs-text-dim">« Actif • X apps surveillées ». Désactivable ou minimisable selon tes préférences.</p>
+              </div>
+              <input id="notif-shield" type="checkbox" checked onchange="saveNotifSettings()" class="w-5 h-5 cursor-pointer shrink-0" />
+            </label>
+            <div class="pt-0.5 pb-1">
+              <button onclick="openShieldNotifChannel()" class="text-[11px] font-semibold cs-text-accent underline">Gérer les catégories de notifications Android →</button>
+            </div>
             <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
               <div class="pr-3">
                 <p class="text-xs font-bold" style="color:var(--cs-text)">🌙 Couvre-feu Digital (21h30)</p>
@@ -833,9 +858,17 @@
           <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
             <i data-lucide="smartphone" class="w-4 h-4 cs-text-success"></i> Permissions Android
           </h3>
-          <p class="text-xs cs-text-sub leading-relaxed">Active ces accès dans les réglages système (un seul clic chacun). Au retour dans l'app, le statut se met à jour automatiquement.</p>
+          <p class="text-xs cs-text-sub leading-relaxed">Active ces accès dans les réglages système. Sur Android 13+, débloque d'abord les paramètres restreints via les 3 petits points ⋮ en haut à droite.</p>
 
           <div class="space-y-2.5 text-xs">
+            <div id="row-perm-restricted" class="p-3 rounded-2xl flex items-center justify-between gap-3" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+              <div class="min-w-0">
+                <p class="font-bold flex items-center gap-2 flex-wrap" style="color:var(--cs-text)">0. Paramètres restreints (Android 13+) <span id="perm-restricted"></span></p>
+                <p class="text-[11px] cs-text-dim">Requis si Android bloque l'accès : appuie sur les 3 points ⋮ en haut à droite puis « Autoriser les paramètres restreints ».</p>
+              </div>
+              <button onclick="openAndroidSettings('restricted')" class="px-3 py-1.5 rounded-xl cs-btn-primary font-semibold shrink-0 text-xs">Débloquer</button>
+            </div>
+
             <div class="p-3 rounded-2xl flex items-center justify-between gap-3" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
               <div class="min-w-0">
                 <p class="font-bold flex items-center gap-2 flex-wrap" style="color:var(--cs-text)">1. Données d'utilisation <span id="perm-usage"></span></p>
@@ -1004,7 +1037,7 @@
           <span class="text-xs font-bold" style="color:var(--cs-text)">Sommeil cette nuit :</span>
           <span id="morning-sleep-txt" class="font-mono-num text-sm font-bold cs-text-success">8.0 h</span>
         </div>
-        <input id="morning-sleep-range" type="range" min="3" max="11" step="0.5" value="8" oninput="document.getElementById('morning-sleep-txt').textContent = this.value + ' h'" class="w-full" />
+        <input id="morning-sleep-range" type="range" min="3" max="11" step="0.5" value="8" oninput="onMorningSleepChange(this.value)" class="w-full" />
       </div>
 
       <div class="space-y-2">
@@ -1018,6 +1051,48 @@
       </div>
 
       <button onclick="submitMorningReview()" class="w-full py-3 rounded-2xl cs-btn-primary font-extrabold text-sm active:scale-98">Enregistrer le Bilan</button>
+    </div>
+  </div>
+
+  <!-- MODALE GUIDAGE PARAMÈTRES RESTREINTS (ANDROID 13+) -->
+  <div id="restricted-modal" class="fixed inset-0 z-50 hidden cs-modal-overlay flex items-center justify-center p-4">
+    <div class="w-full max-w-sm cs-card rounded-3xl p-5 space-y-4 shadow-2xl" style="border-color:var(--cs-accent-border)">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 cs-text-accent" style="background:var(--cs-accent-bg);border:1px solid var(--cs-accent-border)">
+            <i data-lucide="unlock" class="w-4 h-4"></i>
+          </div>
+          <h2 class="text-base font-extrabold" style="color:var(--cs-text)">Déblocage Android 13+</h2>
+        </div>
+        <button onclick="closeRestrictedModal()" class="cs-text-dim"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <p class="text-xs cs-text-sub leading-relaxed">
+        Par sécurité, Android grise les autorisations d'affichage et d'accessibilité pour les applications installées hors Play Store (sécurité Google).
+      </p>
+
+      <div class="p-3.5 rounded-2xl space-y-2.5 text-xs" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+        <p class="font-bold cs-text-accent">Procédure simple en 2 étapes :</p>
+        <div class="space-y-2 text-xs" style="color:var(--cs-text)">
+          <div class="flex items-start gap-2">
+            <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 cs-btn-primary">1</span>
+            <p>Appuie sur le bouton <b>« Ouvrir Infos CosmosShield »</b> ci-dessous.</p>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 cs-btn-primary">2</span>
+            <p>Touche les <b>3 petits points (⋮)</b> tout en haut à droite de l'écran, puis choisis <b>« Autoriser les paramètres restreints »</b>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <button onclick="openAndroidSettings('restricted'); closeRestrictedModal();" class="w-full py-3 rounded-2xl cs-btn-primary font-bold text-sm shadow-md active:scale-98 flex items-center justify-center gap-2">
+          <i data-lucide="external-link" class="w-4 h-4"></i> Ouvrir Infos CosmosShield
+        </button>
+        <button onclick="closeRestrictedModal()" class="w-full py-2.5 rounded-xl cs-btn-subtle text-xs font-semibold">
+          Je le ferai plus tard
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1066,7 +1141,7 @@
       { id: 'hab_sleep', name: 'Sommeil 8 Heures', target: '≥ 8h', icon: 'moon' }
     ];
     const PRESET_DETOX = [
-      { id: 'det_porn', name: 'No Porn / Abstinence', type: 'abstinence', icon: 'shield-off' },
+      { id: 'det_porn', name: 'Abstinence', type: 'abstinence', icon: 'shield-off' },
       { id: 'det_screen', name: "Temps d'écran Global", type: 'screentime', limitHours: 2.0, icon: 'smartphone' }
     ];
     const DEFAULT_APPS = [
@@ -1083,7 +1158,15 @@
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return { habits: [], detox: [], history: {}, shieldApps: JSON.parse(JSON.stringify(DEFAULT_APPS)) };
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.detox)) {
+          parsed.detox.forEach(d => {
+            if (d.id === 'det_porn' || d.name === 'No Porn / Abstinence') {
+              d.name = 'Abstinence';
+            }
+          });
+        }
+        return parsed;
       } catch (e) {
         return { habits: [], detox: [], history: {}, shieldApps: JSON.parse(JSON.stringify(DEFAULT_APPS)) };
       }
@@ -1122,7 +1205,7 @@
 
     // --- 3. GESTION DES THÈMES & LUMINOSITÉ ---
     function initTheme() {
-      const t = localStorage.getItem(THEME_KEY) || 'cosmic';
+      const t = localStorage.getItem(THEME_KEY) || 'warrior';
       const m = localStorage.getItem(MODE_KEY) || 'dark';
       applyTheme(t, m);
       if (NATIVE) {
@@ -1200,6 +1283,7 @@
       if (NATIVE) {
         const s = nbJson('getNotifSettings');
         if (s) {
+          document.getElementById('notif-shield').checked = s.shield !== false;
           document.getElementById('notif-curfew').checked = s.curfew !== false;
           document.getElementById('notif-morning').checked = s.morning !== false;
         }
@@ -1208,6 +1292,7 @@
           const raw = localStorage.getItem('cs_notif_prefs');
           if (raw) {
             const p = JSON.parse(raw);
+            document.getElementById('notif-shield').checked = p.shield !== false;
             document.getElementById('notif-curfew').checked = p.curfew !== false;
             document.getElementById('notif-morning').checked = p.morning !== false;
           }
@@ -1215,20 +1300,34 @@
       }
     }
     function saveNotifSettings() {
+      const shield = document.getElementById('notif-shield').checked;
       const curfew = document.getElementById('notif-curfew').checked;
       const morning = document.getElementById('notif-morning').checked;
       if (NATIVE) {
-        nb('setNotifSettings', JSON.stringify({ curfew, morning }));
+        nb('setNotifSettings', JSON.stringify({ shield, curfew, morning }));
       } else {
-        localStorage.setItem('cs_notif_prefs', JSON.stringify({ curfew, morning }));
+        localStorage.setItem('cs_notif_prefs', JSON.stringify({ shield, curfew, morning }));
       }
       toast('Préférences de notifications enregistrées');
+    }
+    function openShieldNotifChannel() {
+      if (NATIVE) {
+        nb('openShieldNotificationSettings');
+      } else {
+        toast("Disponible dans l'application Android");
+      }
     }
 
     // --- 6. RENDU DE L'ONGLET AUJOURD'HUI ---
     function renderToday() {
       const todayKey = getDateKey();
       const rec = getDayRec(todayKey);
+
+      // Bannière Bilan du Matin : visible seulement si pas encore rempli aujourd'hui
+      const morningBanner = document.getElementById('morning-banner');
+      if (morningBanner) {
+        morningBanner.classList.toggle('hidden', !!rec.morningDone);
+      }
 
       const totalMins = Math.round(rec.screenTimeHours * 60);
       const h = Math.floor(totalMins / 60);
@@ -1780,6 +1879,7 @@
     window.__onBack = function () {
       if (!document.getElementById('day-bubble').classList.contains('hidden')) { hideDayBubble(); return true; }
       if (!document.getElementById('breath-modal').classList.contains('hidden')) { declineGate(); return true; }
+      if (!document.getElementById('restricted-modal').classList.contains('hidden')) { closeRestrictedModal(); return true; }
       if (!document.getElementById('apps-modal').classList.contains('hidden')) { closeAppPicker(); return true; }
       if (!document.getElementById('presets-modal').classList.contains('hidden')) { closePresetsModal(); return true; }
       if (!document.getElementById('morning-modal').classList.contains('hidden')) { closeMorningModal(); return true; }
@@ -1788,17 +1888,51 @@
     };
 
     // --- 10. PERMISSIONS ---
-    let perms = { usage: false, overlay: false, notif: false, battery: false };
+    let perms = { usage: false, overlay: false, notif: false, battery: false, restricted: false };
+    let hasPromptedRestricted = false;
 
     function refreshPermissions() {
       if (NATIVE) {
         const p = nbJson('getPermissions');
-        if (p) perms = p;
+        if (p) {
+          perms = p;
+          // Si l'utilisateur est sur Android 13+ et a les réglages restreints actifs, afficher le guidage au démarrage
+          if (perms.restricted && !hasPromptedRestricted) {
+            hasPromptedRestricted = true;
+            openRestrictedModal();
+          }
+        }
       }
       renderPermissions();
     }
 
+    function openRestrictedModal() {
+      const modal = document.getElementById('restricted-modal');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeRestrictedModal() {
+      const modal = document.getElementById('restricted-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
     function renderPermissions() {
+      // 0. Paramètres restreints
+      const restrictedBadge = document.getElementById('perm-restricted');
+      const restrictedRow = document.getElementById('row-perm-restricted');
+      if (restrictedBadge && restrictedRow) {
+        if (!NATIVE) {
+          restrictedBadge.textContent = 'App Android';
+          restrictedBadge.style.cssText = 'font-size:10px;padding:2px 8px;border-radius:9999px;background:var(--cs-badge-bg);color:var(--cs-text-dim);border:1px solid var(--cs-badge-border);font-family:JetBrains Mono,monospace';
+        } else if (perms.restricted) {
+          restrictedBadge.textContent = 'À débloquer (3 points ⋮)';
+          restrictedBadge.style.cssText = 'font-size:10px;padding:2px 8px;border-radius:9999px;background:var(--cs-danger-bg);color:var(--cs-danger-text);border:1px solid var(--cs-danger-border);font-family:JetBrains Mono,monospace';
+        } else {
+          restrictedBadge.textContent = 'Autorisé';
+          restrictedBadge.style.cssText = 'font-size:10px;padding:2px 8px;border-radius:9999px;background:var(--cs-success-bg);color:var(--cs-success-text);border:1px solid var(--cs-success-border);font-family:JetBrains Mono,monospace';
+        }
+      }
+
       ['usage', 'overlay', 'notif', 'battery'].forEach(k => {
         const badge = document.getElementById('perm-' + k);
         if (!badge) return;
@@ -1810,7 +1944,7 @@
           ? 'font-size:10px;padding:2px 8px;border-radius:9999px;background:var(--cs-success-bg);color:var(--cs-success-text);border:1px solid var(--cs-success-border);font-family:JetBrains Mono,monospace'
           : 'font-size:10px;padding:2px 8px;border-radius:9999px;background:var(--cs-danger-bg);color:var(--cs-danger-text);border:1px solid var(--cs-danger-border);font-family:JetBrains Mono,monospace';
       });
-      const critical = NATIVE && !(perms.usage && perms.overlay);
+      const critical = NATIVE && (!(perms.usage && perms.overlay) || perms.restricted);
       const dot = document.getElementById('settings-dot');
       if (dot) dot.style.background = critical ? 'var(--cs-warn)' : 'var(--cs-success)';
       const warn = document.getElementById('shield-warning');
@@ -1926,14 +2060,32 @@
       saveState(); openPresetsModal();
     }
 
+    function onMorningSleepChange(val) {
+      document.getElementById('morning-sleep-txt').textContent = val + ' h';
+      const hours = parseFloat(val);
+      // Cocher automatiquement le sommeil de 8h si la barre est >= 8h, décocher si < 8h
+      document.querySelectorAll('.morning-check').forEach(ch => {
+        const id = ch.getAttribute('data-id');
+        const habit = state.habits.find(h => h.id === id);
+        if (habit && (habit.id === 'hab_sleep' || habit.name.toLowerCase().includes('sommeil'))) {
+          ch.checked = hours >= 8;
+        }
+      });
+    }
+
     function openMorningModal() {
       document.getElementById('morning-modal').classList.remove('hidden');
       const box = document.getElementById('morning-habits-checklist');
       box.innerHTML = '';
       const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
       const yRec = getDayRec(getDateKey(yesterday));
+      const currentSleep = parseFloat(document.getElementById('morning-sleep-range').value || '8');
+
       state.habits.forEach(h => {
-        const checked = yRec.completedHabits.includes(h.id);
+        let checked = yRec.completedHabits.includes(h.id);
+        if (h.id === 'hab_sleep' || h.name.toLowerCase().includes('sommeil')) {
+          checked = currentSleep >= 8;
+        }
         box.innerHTML += `
           <label class="flex items-center justify-between p-2 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
             <span class="text-xs" style="color:var(--cs-text)">${h.name}</span>
@@ -1948,9 +2100,19 @@
     function submitMorningReview() {
       const sleep = parseFloat(document.getElementById('morning-sleep-range').value);
       const clean = document.getElementById('morning-clean-toggle').checked;
-      getDayRec().sleepHours = sleep;
+      const todayRec = getDayRec();
+      todayRec.sleepHours = sleep;
+      todayRec.morningDone = true;
+
       const sleepHabit = state.habits.find(h => h.id === 'hab_sleep' || h.name.toLowerCase().includes('sommeil'));
-      if (sleepHabit && sleep >= 8 && !getDayRec().completedHabits.includes(sleepHabit.id)) getDayRec().completedHabits.push(sleepHabit.id);
+      if (sleepHabit) {
+        if (sleep >= 8) {
+          if (!todayRec.completedHabits.includes(sleepHabit.id)) todayRec.completedHabits.push(sleepHabit.id);
+        } else {
+          todayRec.completedHabits = todayRec.completedHabits.filter(id => id !== sleepHabit.id);
+        }
+      }
+
       const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
       const yRec = getDayRec(getDateKey(yesterday));
       yRec.completedHabits = [];

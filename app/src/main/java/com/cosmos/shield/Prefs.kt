@@ -72,4 +72,7 @@ object Prefs {
     fun setNotifCurfew(c: Context, v: Boolean) { sp(c).edit().putBoolean("notif_curfew", v).apply() }
     fun notifMorning(c: Context): Boolean = sp(c).getBoolean("notif_morning", true)
     fun setNotifMorning(c: Context, v: Boolean) { sp(c).edit().putBoolean("notif_morning", v).apply() }
+    fun notifShield(c: Context): Boolean = sp(c).getBoolean("notif_shield", true)
+    fun setNotifShield(c: Context, v: Boolean) { sp(c).edit().putBoolean("notif_shield", v).apply() }
 }
+

@@ -36,6 +36,7 @@ class ShieldService : Service() {
         super.onCreate()
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(NotificationChannel(CHANNEL, "Bouclier actif", NotificationManager.IMPORTANCE_LOW))
+        nm.createNotificationChannel(NotificationChannel(CHANNEL_SILENT, "Bouclier discret", NotificationManager.IMPORTANCE_MIN))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -45,6 +46,11 @@ class ShieldService : Service() {
             startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         } else {
             startForeground(NOTIF_ID, n)
+        }
+        if (intent?.action == ACTION_UPDATE_NOTIF) {
+            val nm = getSystemService(NotificationManager::class.java)
+            nm.notify(NOTIF_ID, n)
+            return START_STICKY
         }
         if (exec == null) {
             lastTs = System.currentTimeMillis() - 2 * 3600_000L
@@ -63,17 +69,25 @@ class ShieldService : Service() {
     }
 
     private fun buildNotification(count: Int): Notification {
+        val showNotif = Prefs.notifShield(this)
+        val targetChannel = if (showNotif) CHANNEL else CHANNEL_SILENT
         val pi = PendingIntent.getActivity(
             this, 0, Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        return Notification.Builder(this, CHANNEL)
+        val builder = Notification.Builder(this, targetChannel)
             .setSmallIcon(R.drawable.ic_stat_cosmos)
-            .setContentTitle("Cosmos Shield actif")
-            .setContentText(if (count == 1) "1 application surveillée" else "$count applications surveillées")
             .setContentIntent(pi)
             .setOngoing(true)
-            .build()
+
+        if (showNotif) {
+            builder.setContentTitle("Cosmos Shield actif")
+                .setContentText(if (count == 1) "1 application surveillée" else "$count applications surveillées")
+        } else {
+            builder.setContentTitle("Cosmos Shield")
+                .setContentText("Protection active en arrière-plan")
+        }
+        return builder.build()
     }
 
     private fun safeTick() {
@@ -129,8 +143,15 @@ class ShieldService : Service() {
     }
 
     companion object {
-        private const val CHANNEL = "cosmos_shield"
+        const val CHANNEL = "cosmos_shield"
+        const val CHANNEL_SILENT = "cosmos_shield_silent"
+        const val ACTION_UPDATE_NOTIF = "UPDATE_NOTIF"
         private const val NOTIF_ID = 1
+
+        fun updateNotification(c: Context) {
+            val i = Intent(c, ShieldService::class.java).setAction(ACTION_UPDATE_NOTIF)
+            try { c.startService(i) } catch (e: Exception) { }
+        }
 
         /** Démarre ou arrête le service selon les permissions et la configuration. */
         fun sync(c: Context) {

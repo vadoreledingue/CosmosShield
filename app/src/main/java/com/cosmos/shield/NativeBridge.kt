@@ -1,11 +1,13 @@
 package com.cosmos.shield
 
+import android.app.AppOpsManager
 import android.app.NotificationManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.webkit.JavascriptInterface
@@ -21,12 +23,26 @@ class NativeBridge(private val act: MainActivity) {
     @Volatile var pendingOpen: String? = null
 
     @JavascriptInterface
+    fun isRestrictedSettingsActive(): Boolean {
+        if (Build.VERSION.SDK_INT < 33) return false
+        return try {
+            val appOps = ctx.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val mode = appOps.unsafeCheckOpNoThrow(
+                "android:access_restricted_settings",
+                android.os.Process.myUid(),
+                ctx.packageName
+            )
+            mode != AppOpsManager.MODE_ALLOWED
+        } catch (e: Exception) { false }
+    }
+
+    @JavascriptInterface
     fun getPermissions(): String = JSONObject().apply {
         put("usage", Usage.hasAccess(ctx))
         put("overlay", Settings.canDrawOverlays(ctx))
         put("notif", ctx.getSystemService(NotificationManager::class.java).areNotificationsEnabled())
         put("battery", ctx.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(ctx.packageName))
-
+        put("restricted", isRestrictedSettingsActive())
     }.toString()
 
     @JavascriptInterface
@@ -36,6 +52,12 @@ class NativeBridge(private val act: MainActivity) {
             "usage" -> Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, pkg)
             "overlay" -> Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, pkg)
             "battery" -> Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+            "restricted" -> {
+                act.runOnUiThread {
+                    Toast.makeText(ctx, "Appuyez sur les 3 points (⋮) en haut à droite > Autoriser les paramètres restreints", Toast.LENGTH_LONG).show()
+                }
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg)
+            }
             else -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg)
         }
         if (start(intent)) return
@@ -152,6 +174,7 @@ class NativeBridge(private val act: MainActivity) {
     fun getNotifSettings(): String = JSONObject().apply {
         put("curfew", Prefs.notifCurfew(ctx))
         put("morning", Prefs.notifMorning(ctx))
+        put("shield", Prefs.notifShield(ctx))
     }.toString()
 
     @JavascriptInterface
@@ -160,7 +183,22 @@ class NativeBridge(private val act: MainActivity) {
             val o = JSONObject(json)
             if (o.has("curfew")) Prefs.setNotifCurfew(ctx, o.getBoolean("curfew"))
             if (o.has("morning")) Prefs.setNotifMorning(ctx, o.getBoolean("morning"))
+            if (o.has("shield")) {
+                Prefs.setNotifShield(ctx, o.getBoolean("shield"))
+                ShieldService.updateNotification(ctx)
+            }
             Reminders.scheduleAll(ctx)
         } catch (e: Exception) { /* invalid JSON */ }
+    }
+
+    @JavascriptInterface
+    fun openShieldNotificationSettings() {
+        val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName)
+            putExtra(Settings.EXTRA_CHANNEL_ID, ShieldService.CHANNEL)
+        }
+        if (!start(intent)) {
+            start(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName))
+        }
     }
 }
