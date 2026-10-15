@@ -711,6 +711,22 @@
             Choisis tes applications. À chaque ouverture : <strong style="color:var(--cs-text)">filtre gris transparent</strong> (sans permission ADB) + <strong class="cs-text-accent">Breath Gate</strong> (respiration de 6s, puis session de 1 à 5 min).
           </p>
         </div>
+        <!-- BANNIÈRE BLOCUS SOMMEIL DANS L'ONGLET BOUCLIER -->
+        <div id="shield-sleep-status-banner" class="cs-card rounded-2xl p-3 flex items-center justify-between gap-3 cursor-pointer active:scale-[0.99] transition" onclick="switchTab('settings')" style="border-color:var(--cs-card-border)">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style="background:var(--cs-accent-bg);color:var(--cs-accent)">
+              <i data-lucide="moon" class="w-4 h-4"></i>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold" style="color:var(--cs-text)">Blocus Sommeil</span>
+                <span id="shield-sleep-pill" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full cs-badge">22h00 — 08h00</span>
+              </div>
+              <p id="shield-sleep-sub" class="text-[10px] cs-text-dim truncate">Verrouillage nocturne des apps surveillées</p>
+            </div>
+          </div>
+          <button class="text-xs font-semibold cs-text-accent shrink-0">Régler →</button>
+        </div>
         <div id="shield-warning" class="hidden cs-card rounded-2xl p-3 flex items-center justify-between gap-3" style="border-color:var(--cs-warn)">
           <p class="text-[11px] cs-text-warn leading-snug">⚠️ Active l'accès aux données d'utilisation et l'affichage par-dessus les autres apps pour que le bouclier fonctionne.</p>
           <button onclick="switchTab('settings')" class="px-3 py-1.5 rounded-xl text-xs font-bold shrink-0" style="background:var(--cs-warn);color:#000">Réglages</button>
@@ -819,37 +835,110 @@
           </button>
         </div>
 
-        <!-- RÉGLAGES DE NOTIFICATIONS -->
-        <div class="cs-card rounded-2xl p-4 space-y-3">
-          <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
-            <i data-lucide="bell" class="w-4 h-4 cs-text-accent"></i> Notifications &amp; Alertes
-          </h3>
-          <p class="text-xs cs-text-sub">Choisis les notifications et rappels que tu souhaites recevoir :</p>
+        <!-- ================= OPTIONS DU SOMMEIL & COUVRE-FEU ================= -->
+        <div class="cs-card rounded-2xl p-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
+              <i data-lucide="moon" class="w-4 h-4 cs-text-accent"></i> Sommeil, Couvre-feu &amp; Blocus
+            </h3>
+            <span id="sleep-status-badge" class="text-[10px] px-2.5 py-0.5 rounded-full font-bold cs-badge">22:00 → 08:00</span>
+          </div>
+
+          <p class="text-xs cs-text-sub leading-relaxed">
+            Configure tes heures de couvre-feu, tes alertes et le blocus strict des applications pour protéger ton sommeil de la lumière bleue et du défilement infini.
+          </p>
+
+          <!-- 1. PLAGE HORAIRE DU COUVRE-FEU & BLOCUS -->
+          <div class="space-y-2.5 p-3.5 rounded-2xl" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+            <p class="text-xs font-bold flex items-center gap-1.5" style="color:var(--cs-text)">
+              <i data-lucide="clock" class="w-3.5 h-3.5 cs-text-accent"></i> Plage Horaire du Couvre-feu &amp; Blocus
+            </p>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="sleep-block-start" class="block text-[10px] font-bold cs-text-dim mb-1">🌙 Coucher (Début)</label>
+                <input id="sleep-block-start" type="time" value="22:00" onchange="onSleepBlockTimeChange()" class="w-full cs-input px-3 py-2 rounded-xl font-mono-num font-bold text-xs" />
+              </div>
+              <div>
+                <label for="sleep-block-end" class="block text-[10px] font-bold cs-text-dim mb-1">☀️ Réveil (Fin)</label>
+                <input id="sleep-block-end" type="time" value="08:00" onchange="onSleepBlockTimeChange()" class="w-full cs-input px-3 py-2 rounded-xl font-mono-num font-bold text-xs" />
+              </div>
+            </div>
+
+            <!-- Presets rapides -->
+            <div class="flex items-center gap-1.5 pt-1 flex-wrap">
+              <span class="text-[10px] cs-text-dim font-medium mr-1">Raccourcis :</span>
+              <button type="button" onclick="setSleepPreset('22:00', '08:00')" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold cs-btn-subtle active:scale-95">22h — 8h (Défaut)</button>
+              <button type="button" onclick="setSleepPreset('23:00', '07:00')" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold cs-btn-subtle active:scale-95">23h — 7h</button>
+              <button type="button" onclick="setSleepPreset('21:30', '07:30')" class="px-2.5 py-1 rounded-lg text-[10px] font-semibold cs-btn-subtle active:scale-95">21h30 — 7h30</button>
+            </div>
+
+            <p id="sleep-duration-summary" class="text-[11px] font-medium cs-text-accent pt-1">Durée : 10h de repos nocturne (22:00 → 08:00)</p>
+          </div>
+
+          <!-- 2. BLOCUS STRICT ET FILTRE NOCTURNE -->
           <div class="space-y-2">
             <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
               <div class="pr-3">
-                <p class="text-xs font-bold" style="color:var(--cs-text)">🛡️ Notification permanente du Bouclier</p>
-                <p class="text-[10px] cs-text-dim">« Actif • X apps surveillées ». Désactivable ou minimisable selon tes préférences.</p>
+                <p class="text-xs font-bold" style="color:var(--cs-text)">🔒 Blocus strict des applications</p>
+                <p class="text-[10px] cs-text-dim">Verrouille les applications surveillées pendant la nuit. Les sessions de défilement sont interdites pendant le couvre-feu.</p>
               </div>
-              <input id="notif-shield" type="checkbox" checked onchange="saveNotifSettings()" class="w-5 h-5 cursor-pointer shrink-0" />
+              <input id="sleep-block-toggle" type="checkbox" checked onchange="saveSleepSettings()" class="w-5 h-5 cursor-pointer shrink-0" />
             </label>
-            <div class="pt-0.5 pb-1">
-              <button onclick="openShieldNotifChannel()" class="text-[11px] font-semibold cs-text-accent underline">Gérer les catégories de notifications Android →</button>
+
+            <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+              <div class="pr-3">
+                <p class="text-xs font-bold" style="color:var(--cs-text)">🌫️ Filtre noir &amp; blanc nocturne</p>
+                <p class="text-[10px] cs-text-dim">Active automatiquement l'écran en noir &amp; blanc pendant toute la durée du couvre-feu pour apaiser les yeux.</p>
+              </div>
+              <input id="sleep-grayscale-toggle" type="checkbox" checked onchange="saveSleepSettings()" class="w-5 h-5 cursor-pointer shrink-0" />
+            </label>
+          </div>
+
+          <!-- 3. HEURES DES NOTIFICATIONS & RAPPELS -->
+          <div class="space-y-2 pt-1">
+            <p class="text-xs font-bold flex items-center gap-1.5" style="color:var(--cs-text)">
+              <i data-lucide="bell" class="w-3.5 h-3.5 cs-text-accent"></i> Rappels &amp; Notifications Programmés
+            </p>
+
+            <div class="p-3 rounded-xl space-y-2" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+              <div class="flex items-center justify-between gap-2">
+                <label class="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                  <input id="notif-curfew" type="checkbox" checked onchange="saveSleepSettings()" class="w-4 h-4 cursor-pointer shrink-0" />
+                  <span class="text-xs font-bold truncate" style="color:var(--cs-text)">🌙 Rappel Couvre-feu du soir</span>
+                </label>
+                <input id="sleep-notif-curfew-time" type="time" value="22:00" onchange="saveSleepSettings()" class="cs-input px-2.5 py-1 rounded-xl font-mono-num font-bold text-xs" />
+              </div>
+              <p class="text-[10px] cs-text-dim pl-6">Notification pour poser son téléphone, passer en mode nuit et lire un livre.</p>
             </div>
-            <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
-              <div class="pr-3">
-                <p class="text-xs font-bold" style="color:var(--cs-text)">🌙 Couvre-feu Digital (21h30)</p>
-                <p class="text-[10px] cs-text-dim">Rappel du soir pour couper les écrans et lire un livre.</p>
+
+            <div class="p-3 rounded-xl space-y-2" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+              <div class="flex items-center justify-between gap-2">
+                <label class="flex items-center gap-2 cursor-pointer flex-1 min-w-0">
+                  <input id="notif-morning" type="checkbox" checked onchange="saveSleepSettings()" class="w-4 h-4 cursor-pointer shrink-0" />
+                  <span class="text-xs font-bold truncate" style="color:var(--cs-text)">☀️ Rappel Bilan du Matin</span>
+                </label>
+                <input id="sleep-notif-morning-time" type="time" value="08:00" onchange="saveSleepSettings()" class="cs-input px-2.5 py-1 rounded-xl font-mono-num font-bold text-xs" />
               </div>
-              <input id="notif-curfew" type="checkbox" checked onchange="saveNotifSettings()" class="w-5 h-5 cursor-pointer shrink-0" />
-            </label>
-            <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
-              <div class="pr-3">
-                <p class="text-xs font-bold" style="color:var(--cs-text)">☀️ Bilan du Matin (08h00)</p>
-                <p class="text-[10px] cs-text-dim">Rappel pour enregistrer tes heures de sommeil et valider la veille.</p>
-              </div>
-              <input id="notif-morning" type="checkbox" checked onchange="saveNotifSettings()" class="w-5 h-5 cursor-pointer shrink-0" />
-            </label>
+              <p class="text-[10px] cs-text-dim pl-6">Notification au réveil pour enregistrer son sommeil et valider sa journée d'hier.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTIFICATION DU SYSTÈME BOUCLIER -->
+        <div class="cs-card rounded-2xl p-4 space-y-3">
+          <h3 class="text-sm font-bold flex items-center gap-2" style="color:var(--cs-text)">
+            <i data-lucide="shield" class="w-4 h-4 cs-text-accent"></i> Notification Permanente du Bouclier
+          </h3>
+          <label class="flex items-center justify-between p-3 rounded-xl cursor-pointer" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
+            <div class="pr-3">
+              <p class="text-xs font-bold" style="color:var(--cs-text)">Notification permanente active</p>
+              <p class="text-[10px] cs-text-dim">« Actif • X apps surveillées ». Minimisable ou désactivable selon tes préférences.</p>
+            </div>
+            <input id="notif-shield" type="checkbox" checked onchange="saveSleepSettings()" class="w-5 h-5 cursor-pointer shrink-0" />
+          </label>
+          <div class="pt-0.5">
+            <button onclick="openShieldNotifChannel()" class="text-[11px] font-semibold cs-text-accent underline">Gérer les catégories de notifications Android →</button>
           </div>
         </div>
 
@@ -888,7 +977,7 @@
             <div class="p-3 rounded-2xl flex items-center justify-between gap-3" style="background:var(--cs-input-bg);border:1px solid var(--cs-input-border)">
               <div class="min-w-0">
                 <p class="font-bold flex items-center gap-2 flex-wrap" style="color:var(--cs-text)">3. Notifications <span id="perm-notif"></span></p>
-                <p class="text-[11px] cs-text-dim">Autorise les rappels programmés de 21h30 et 8h.</p>
+                <p class="text-[11px] cs-text-dim">Autorise les rappels programmés de couvre-feu et bilan matinal.</p>
               </div>
               <button onclick="requestAppNotifications()" class="px-3 py-1.5 rounded-xl cs-btn-primary font-semibold shrink-0 text-xs">Activer</button>
             </div>
@@ -985,7 +1074,8 @@
   <!-- MODALE BREATH GATE -->
   <div id="breath-modal" class="fixed inset-0 z-50 hidden flex flex-col items-center justify-between p-6 text-center" style="background:var(--cs-bg)">
     <div class="w-full flex items-center justify-between pt-2">
-      <span class="text-[10px] font-mono-num uppercase px-3 py-1 rounded-full cs-badge">SAS DE RESPIRATION</span>
+      <span id="breath-standard-badge" class="text-[10px] font-mono-num uppercase px-3 py-1 rounded-full cs-badge">SAS DE RESPIRATION</span>
+      <span id="breath-sleep-badge" class="hidden text-[10px] font-mono-num uppercase px-3 py-1 rounded-full cs-badge" style="color:var(--cs-warn-text);border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.15)">🌙 BLOCUS DU SOMMEIL</span>
       <span class="text-[10px] font-mono-num px-2.5 py-1 rounded-full cs-badge">FILTRE GRIS ACTIF</span>
     </div>
 
@@ -993,7 +1083,7 @@
       <div class="space-y-1">
         <p class="text-xs uppercase tracking-widest font-semibold cs-text-accent">Application interceptée</p>
         <h2 id="breath-app-title" class="text-2xl font-extrabold" style="color:var(--cs-text)">Instagram</h2>
-        <p class="text-xs cs-text-dim">Respire consciemment avant de décider du temps d'utilisation.</p>
+        <p id="breath-app-subtitle" class="text-xs cs-text-dim">Respire consciemment avant de décider du temps d'utilisation.</p>
       </div>
       <div class="relative w-44 h-44 flex items-center justify-center">
         <div id="breath-circle" class="breath-orb w-36 h-36 rounded-full flex flex-col items-center justify-center" style="background:linear-gradient(135deg, var(--cs-accent), var(--cs-accent2));box-shadow:0 0 50px var(--cs-accent-bg);border:1px solid rgba(255,255,255,0.25)">
@@ -1001,6 +1091,8 @@
           <span id="breath-sec" class="text-2xl font-mono-num font-bold mt-1 text-white">6s</span>
         </div>
       </div>
+
+      <!-- Bloc normal : choix de durée -->
       <div id="breath-durations" class="w-full space-y-3 opacity-30 pointer-events-none transition-opacity duration-500">
         <p class="text-xs font-semibold cs-text-sub">Choisis ta durée de session (avant un nouveau sas) :</p>
         <div class="grid grid-cols-5 gap-2">
@@ -1011,10 +1103,17 @@
           <button onclick="startAppSession(5)" class="py-3 rounded-xl cs-btn-subtle font-mono-num font-bold text-sm">5m</button>
         </div>
       </div>
+
+      <!-- Bloc Blocus Sommeil Nocturne -->
+      <div id="breath-sleep-notice" class="hidden w-full space-y-2.5 p-3.5 rounded-2xl text-center" style="background:var(--cs-input-bg);border:1px solid var(--cs-warn)">
+        <p class="text-xs font-bold" style="color:var(--cs-warn-text)">🌙 Verrouillage de Nuit Actif</p>
+        <p class="text-[11px] cs-text-dim leading-relaxed">Les sessions libres sont suspendues pendant le couvre-feu pour préserver votre repos.</p>
+        <button onclick="emergencyUnlockGate()" class="text-[10px] font-medium cs-text-dim underline hover:text-white transition">Déverrouillage d'urgence exceptionnel (1m)</button>
+      </div>
     </div>
 
     <div class="w-full max-w-xs pb-2">
-      <button onclick="declineGate()" class="w-full py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-98" style="background:var(--cs-success);color:#ffffff">
+      <button id="breath-main-close-btn" onclick="declineGate()" class="w-full py-3.5 rounded-2xl font-bold text-sm shadow-lg active:scale-98" style="background:var(--cs-success);color:#ffffff">
         ✋ J'ai fini / Fermer l'appli
       </button>
     </div>
@@ -1201,6 +1300,7 @@
       document.getElementById('live-system-date').textContent = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }).format(now);
       updateAbstinenceTimers();
       checkAutoNotifications(now);
+      updateSleepLiveStatus();
     }
 
     // --- 3. GESTION DES THÈMES & LUMINOSITÉ ---
@@ -1278,43 +1378,234 @@
       toast('Couleurs rétablies');
     }
 
-    // --- 5. RÉGLAGES DE NOTIFICATIONS ---
-    function loadNotifSettings() {
+    // --- 5. GESTION DU SOMMEIL, COUVRE-FEU & NOTIFICATIONS ---
+    let sleepSettings = {
+      notifCurfew: true,
+      curfewTime: '22:00',
+      notifMorning: true,
+      morningTime: '08:00',
+      sleepBlock: true,
+      blockStart: '22:00',
+      blockEnd: '08:00',
+      sleepGrayscale: true,
+      shield: true
+    };
+
+    function isTimeInRange(curH, curM, startStr, endStr) {
+      const [sh, sm] = (startStr || '22:00').split(':').map(Number);
+      const [eh, em] = (endStr || '08:00').split(':').map(Number);
+      const cur = curH * 60 + curM;
+      const start = (sh || 0) * 60 + (sm || 0);
+      const end = (eh || 0) * 60 + (em || 0);
+      if (start <= end) {
+        return cur >= start && cur < end;
+      } else {
+        return cur >= start || cur < end;
+      }
+    }
+
+    function isSleepBlockActiveNow() {
+      if (!sleepSettings.sleepBlock) return false;
       if (NATIVE) {
-        const s = nbJson('getNotifSettings');
-        if (s) {
-          document.getElementById('notif-shield').checked = s.shield !== false;
-          document.getElementById('notif-curfew').checked = s.curfew !== false;
-          document.getElementById('notif-morning').checked = s.morning !== false;
+        try {
+          const res = nb('isSleepBlockActive');
+          if (res === 'true' || res === true) return true;
+        } catch(e) {}
+      }
+      const now = new Date();
+      return isTimeInRange(now.getHours(), now.getMinutes(), sleepSettings.blockStart, sleepSettings.blockEnd);
+    }
+
+    function calcDurationHours(startStr, endStr) {
+      const [sh, sm] = (startStr || '22:00').split(':').map(Number);
+      const [eh, em] = (endStr || '08:00').split(':').map(Number);
+      let diff = (eh * 60 + em) - (sh * 60 + sm);
+      if (diff <= 0) diff += 24 * 60;
+      const h = Math.floor(diff / 60);
+      const m = diff % 60;
+      return m > 0 ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
+    }
+
+    function updateSleepLiveStatus() {
+      const active = isSleepBlockActiveNow();
+      const badge = document.getElementById('sleep-status-badge');
+      if (badge) {
+        if (active) {
+          badge.textContent = '🌙 BLOCUS EN COURS';
+          badge.style.color = 'var(--cs-warn-text)';
+          badge.style.borderColor = 'rgba(245,158,11,0.5)';
+          badge.style.background = 'rgba(245,158,11,0.18)';
+        } else {
+          badge.textContent = `${sleepSettings.blockStart || '22:00'} → ${sleepSettings.blockEnd || '08:00'}`;
+          badge.style.color = '';
+          badge.style.borderColor = '';
+          badge.style.background = '';
+        }
+      }
+
+      const shieldPill = document.getElementById('shield-sleep-pill');
+      if (shieldPill) {
+        shieldPill.textContent = `${sleepSettings.blockStart || '22:00'} — ${sleepSettings.blockEnd || '08:00'}`;
+        if (active) {
+          shieldPill.style.color = 'var(--cs-warn-text)';
+          shieldPill.style.borderColor = 'rgba(245,158,11,0.5)';
+        } else {
+          shieldPill.style.color = '';
+          shieldPill.style.borderColor = '';
+        }
+      }
+
+      const shieldSub = document.getElementById('shield-sleep-sub');
+      if (shieldSub) {
+        if (active) {
+          shieldSub.textContent = '🔒 Verrouillage nocturne actuellement actif';
+          shieldSub.style.color = 'var(--cs-warn-text)';
+        } else {
+          shieldSub.textContent = `Verrouillage nocturne des apps (${sleepSettings.blockStart || '22:00'} à ${sleepSettings.blockEnd || '08:00'})`;
+          shieldSub.style.color = '';
+        }
+      }
+    }
+
+    function updateSleepUI() {
+      const start = sleepSettings.blockStart || '22:00';
+      const end = sleepSettings.blockEnd || '08:00';
+      const dur = calcDurationHours(start, end);
+      const sum = document.getElementById('sleep-duration-summary');
+      if (sum) {
+        sum.textContent = `Durée : ${dur} de repos nocturne (${start} → ${end})`;
+      }
+      updateSleepLiveStatus();
+      if (window.lucide && typeof lucide.createIcons === 'function') lucide.createIcons();
+    }
+
+    function loadSleepSettings() {
+      if (NATIVE) {
+        const s = nbJson('getSleepSettings');
+        if (s && typeof s === 'object') {
+          sleepSettings = { ...sleepSettings, ...s };
         }
       } else {
         try {
-          const raw = localStorage.getItem('cs_notif_prefs');
+          const raw = localStorage.getItem('cs_sleep_settings');
           if (raw) {
-            const p = JSON.parse(raw);
-            document.getElementById('notif-shield').checked = p.shield !== false;
-            document.getElementById('notif-curfew').checked = p.curfew !== false;
-            document.getElementById('notif-morning').checked = p.morning !== false;
+            sleepSettings = { ...sleepSettings, ...JSON.parse(raw) };
+          } else {
+            const oldNotif = localStorage.getItem('cs_notif_prefs');
+            if (oldNotif) {
+              const p = JSON.parse(oldNotif);
+              if ('curfew' in p) sleepSettings.notifCurfew = p.curfew !== false;
+              if ('morning' in p) sleepSettings.notifMorning = p.morning !== false;
+              if ('shield' in p) sleepSettings.shield = p.shield !== false;
+              if (p.curfewTime) sleepSettings.curfewTime = p.curfewTime;
+              if (p.morningTime) sleepSettings.morningTime = p.morningTime;
+            }
           }
         } catch(e) {}
       }
+
+      const elCurfew = document.getElementById('notif-curfew');
+      if (elCurfew) elCurfew.checked = sleepSettings.notifCurfew !== false;
+      const elCurfewTime = document.getElementById('sleep-notif-curfew-time');
+      if (elCurfewTime) elCurfewTime.value = sleepSettings.curfewTime || '22:00';
+
+      const elMorning = document.getElementById('notif-morning');
+      if (elMorning) elMorning.checked = sleepSettings.notifMorning !== false;
+      const elMorningTime = document.getElementById('sleep-notif-morning-time');
+      if (elMorningTime) elMorningTime.value = sleepSettings.morningTime || '08:00';
+
+      const elBlock = document.getElementById('sleep-block-toggle');
+      if (elBlock) elBlock.checked = sleepSettings.sleepBlock !== false;
+
+      const elBlockStart = document.getElementById('sleep-block-start');
+      if (elBlockStart) elBlockStart.value = sleepSettings.blockStart || '22:00';
+
+      const elBlockEnd = document.getElementById('sleep-block-end');
+      if (elBlockEnd) elBlockEnd.value = sleepSettings.blockEnd || '08:00';
+
+      const elGray = document.getElementById('sleep-grayscale-toggle');
+      if (elGray) elGray.checked = sleepSettings.sleepGrayscale !== false;
+
+      const elShield = document.getElementById('notif-shield');
+      if (elShield) elShield.checked = sleepSettings.shield !== false;
+
+      updateSleepUI();
     }
-    function saveNotifSettings() {
-      const shield = document.getElementById('notif-shield').checked;
-      const curfew = document.getElementById('notif-curfew').checked;
-      const morning = document.getElementById('notif-morning').checked;
+
+    function saveSleepSettings() {
+      const elCurfew = document.getElementById('notif-curfew');
+      const elCurfewTime = document.getElementById('sleep-notif-curfew-time');
+      const elMorning = document.getElementById('notif-morning');
+      const elMorningTime = document.getElementById('sleep-notif-morning-time');
+      const elBlock = document.getElementById('sleep-block-toggle');
+      const elBlockStart = document.getElementById('sleep-block-start');
+      const elBlockEnd = document.getElementById('sleep-block-end');
+      const elGray = document.getElementById('sleep-grayscale-toggle');
+      const elShield = document.getElementById('notif-shield');
+
+      if (elCurfew) sleepSettings.notifCurfew = elCurfew.checked;
+      if (elCurfewTime) sleepSettings.curfewTime = elCurfewTime.value || '22:00';
+      if (elMorning) sleepSettings.notifMorning = elMorning.checked;
+      if (elMorningTime) sleepSettings.morningTime = elMorningTime.value || '08:00';
+      if (elBlock) sleepSettings.sleepBlock = elBlock.checked;
+      if (elBlockStart) sleepSettings.blockStart = elBlockStart.value || '22:00';
+      if (elBlockEnd) sleepSettings.blockEnd = elBlockEnd.value || '08:00';
+      if (elGray) sleepSettings.sleepGrayscale = elGray.checked;
+      if (elShield) sleepSettings.shield = elShield.checked;
+
+      localStorage.setItem('cs_sleep_settings', JSON.stringify(sleepSettings));
+      localStorage.setItem('cs_notif_prefs', JSON.stringify({
+        shield: sleepSettings.shield,
+        curfew: sleepSettings.notifCurfew,
+        morning: sleepSettings.notifMorning,
+        curfewTime: sleepSettings.curfewTime,
+        morningTime: sleepSettings.morningTime
+      }));
+
       if (NATIVE) {
-        nb('setNotifSettings', JSON.stringify({ shield, curfew, morning }));
-      } else {
-        localStorage.setItem('cs_notif_prefs', JSON.stringify({ shield, curfew, morning }));
+        nb('setSleepSettings', JSON.stringify(sleepSettings));
       }
-      toast('Préférences de notifications enregistrées');
+
+      updateSleepUI();
+      toast('Paramètres du sommeil mis à jour');
     }
+
+    function onSleepBlockTimeChange() {
+      const elStart = document.getElementById('sleep-block-start');
+      const elEnd = document.getElementById('sleep-block-end');
+      const elCurfewTime = document.getElementById('sleep-notif-curfew-time');
+      const elMorningTime = document.getElementById('sleep-notif-morning-time');
+      if (elStart && elCurfewTime) elCurfewTime.value = elStart.value;
+      if (elEnd && elMorningTime) elMorningTime.value = elEnd.value;
+      saveSleepSettings();
+    }
+
+    function setSleepPreset(start, end) {
+      const elStart = document.getElementById('sleep-block-start');
+      const elEnd = document.getElementById('sleep-block-end');
+      const elCurfewTime = document.getElementById('sleep-notif-curfew-time');
+      const elMorningTime = document.getElementById('sleep-notif-morning-time');
+      if (elStart) elStart.value = start;
+      if (elEnd) elEnd.value = end;
+      if (elCurfewTime) elCurfewTime.value = start;
+      if (elMorningTime) elMorningTime.value = end;
+      saveSleepSettings();
+    }
+
+    function loadNotifSettings() { loadSleepSettings(); }
+    function saveNotifSettings() { saveSleepSettings(); }
+
     function openShieldNotifChannel() {
       if (NATIVE) {
         nb('openShieldNotificationSettings');
       } else {
         toast("Disponible dans l'application Android");
+      }
+    }
+
+    function emergencyUnlockGate() {
+      if (confirm("Déverrouillage exceptionnel de 1 minute pendant le blocus nocturne. Es-tu certain(e) ?")) {
+        startAppSession(1);
       }
     }
 
@@ -1753,25 +2044,61 @@
       document.getElementById('breath-modal').classList.remove('hidden');
       document.getElementById('breath-app-title').textContent = app.name;
       const choices = document.getElementById('breath-durations');
-      choices.classList.add('opacity-30', 'pointer-events-none');
+      const isNightLock = isSleepBlockActiveNow();
+
+      const sleepBadge = document.getElementById('breath-sleep-badge');
+      const standardBadge = document.getElementById('breath-standard-badge');
+      const sleepNotice = document.getElementById('breath-sleep-notice');
+      const subTitle = document.getElementById('breath-app-subtitle');
+      const mainCloseBtn = document.getElementById('breath-main-close-btn');
+
+      if (isNightLock) {
+        if (sleepBadge) sleepBadge.classList.remove('hidden');
+        if (standardBadge) standardBadge.classList.add('hidden');
+        if (sleepNotice) sleepNotice.classList.remove('hidden');
+        if (subTitle) subTitle.textContent = "Couvre-feu nocturne actif (" + (sleepSettings.blockStart || '22:00') + " - " + (sleepSettings.blockEnd || '08:00') + "). Les applications sont verrouillées pour préserver votre repos.";
+        if (choices) choices.classList.add('hidden');
+        if (mainCloseBtn) mainCloseBtn.textContent = "🌙 Fermer l'application et dormir";
+      } else {
+        if (sleepBadge) sleepBadge.classList.add('hidden');
+        if (standardBadge) standardBadge.classList.remove('hidden');
+        if (sleepNotice) sleepNotice.classList.add('hidden');
+        if (subTitle) subTitle.textContent = "Respire consciemment avant de décider du temps d'utilisation.";
+        if (choices) {
+          choices.classList.remove('hidden');
+          choices.classList.add('opacity-30', 'pointer-events-none');
+        }
+        if (mainCloseBtn) mainCloseBtn.textContent = "✋ J'ai fini / Fermer l'appli";
+      }
+
       const circle = document.getElementById('breath-circle');
       const phase = document.getElementById('breath-phase');
       const sec = document.getElementById('breath-sec');
       let rem = 6;
       sec.textContent = `${rem}s`;
-      phase.textContent = 'Inspire...';
+      phase.textContent = isNightLock ? 'Couvre-feu' : 'Inspire...';
       circle.style.transform = 'scale(1.15)';
       if (breathTimer) clearInterval(breathTimer);
       breathTimer = setInterval(() => {
         rem--;
-        if (rem > 3) { phase.textContent = 'Inspire...'; circle.style.transform = 'scale(1.15)'; }
-        else if (rem > 0) { phase.textContent = 'Expire...'; circle.style.transform = 'scale(0.75)'; }
+        if (!isNightLock) {
+          if (rem > 3) { phase.textContent = 'Inspire...'; circle.style.transform = 'scale(1.15)'; }
+          else if (rem > 0) { phase.textContent = 'Expire...'; circle.style.transform = 'scale(0.75)'; }
+        } else {
+          phase.textContent = 'Sommeil...';
+          circle.style.transform = rem % 2 === 0 ? 'scale(1.05)' : 'scale(0.95)';
+        }
         if (rem <= 0) {
           clearInterval(breathTimer);
-          phase.textContent = 'Prêt'; sec.textContent = 'Choisis';
+          phase.textContent = isNightLock ? 'Nuit' : 'Prêt';
+          sec.textContent = isNightLock ? '💤' : 'Choisis';
           circle.style.transform = 'scale(1)';
-          choices.classList.remove('opacity-30', 'pointer-events-none');
-        } else { sec.textContent = `${rem}s`; }
+          if (!isNightLock && choices) {
+            choices.classList.remove('opacity-30', 'pointer-events-none');
+          }
+        } else {
+          sec.textContent = `${rem}s`;
+        }
       }, 1000);
     }
 
@@ -1994,11 +2321,20 @@
       if (NATIVE) return;
       const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
       const key = getDateKey(now) + hhmm;
-      if (hhmm === '21:30' && key !== lastNotifKey && 'Notification' in window && Notification.permission === 'granted') {
-        if (document.getElementById('notif-curfew').checked) {
-          lastNotifKey = key;
-          new Notification('🌙 21h30 — Couvre-feu Digital', { body: 'Pose ton téléphone, passe en mode nuit et prends ton livre avant de dormir.' });
-        }
+      if (key === lastNotifKey) return;
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+      const curfewTime = sleepSettings.curfewTime || '22:00';
+      const morningTime = sleepSettings.morningTime || '08:00';
+
+      if (hhmm === curfewTime && sleepSettings.notifCurfew !== false) {
+        lastNotifKey = key;
+        const [h, m] = curfewTime.split(':');
+        new Notification(`🌙 ${h}h${m} — Couvre-feu Digital`, { body: 'Pose ton téléphone, passe en mode nuit et prends ton livre avant de dormir.' });
+      } else if (hhmm === morningTime && sleepSettings.notifMorning !== false) {
+        lastNotifKey = key;
+        const [h, m] = morningTime.split(':');
+        new Notification(`☀️ ${h}h${m} — Bilan du Matin`, { body: "Note ton sommeil et valide ta journée d'hier." });
       }
     }
 

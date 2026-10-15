@@ -175,6 +175,8 @@ class NativeBridge(private val act: MainActivity) {
         put("curfew", Prefs.notifCurfew(ctx))
         put("morning", Prefs.notifMorning(ctx))
         put("shield", Prefs.notifShield(ctx))
+        put("curfewTime", Prefs.curfewTime(ctx))
+        put("morningTime", Prefs.morningTime(ctx))
     }.toString()
 
     @JavascriptInterface
@@ -183,6 +185,8 @@ class NativeBridge(private val act: MainActivity) {
             val o = JSONObject(json)
             if (o.has("curfew")) Prefs.setNotifCurfew(ctx, o.getBoolean("curfew"))
             if (o.has("morning")) Prefs.setNotifMorning(ctx, o.getBoolean("morning"))
+            if (o.has("curfewTime")) Prefs.setCurfewTime(ctx, o.getString("curfewTime"))
+            if (o.has("morningTime")) Prefs.setMorningTime(ctx, o.getString("morningTime"))
             if (o.has("shield")) {
                 Prefs.setNotifShield(ctx, o.getBoolean("shield"))
                 ShieldService.updateNotification(ctx)
@@ -190,6 +194,39 @@ class NativeBridge(private val act: MainActivity) {
             Reminders.scheduleAll(ctx)
         } catch (e: Exception) { /* invalid JSON */ }
     }
+
+    @JavascriptInterface
+    fun getSleepSettings(): String = JSONObject().apply {
+        put("notifCurfew", Prefs.notifCurfew(ctx))
+        put("curfewTime", Prefs.curfewTime(ctx))
+        put("notifMorning", Prefs.notifMorning(ctx))
+        put("morningTime", Prefs.morningTime(ctx))
+        put("sleepBlock", Prefs.sleepBlockEnabled(ctx))
+        put("blockStart", Prefs.sleepBlockStart(ctx))
+        put("blockEnd", Prefs.sleepBlockEnd(ctx))
+        put("sleepGrayscale", Prefs.sleepGrayscale(ctx))
+        put("isBlockActiveNow", Prefs.isSleepBlockActiveNow(ctx))
+    }.toString()
+
+    @JavascriptInterface
+    fun setSleepSettings(json: String) {
+        try {
+            val o = JSONObject(json)
+            if (o.has("notifCurfew")) Prefs.setNotifCurfew(ctx, o.getBoolean("notifCurfew"))
+            if (o.has("curfewTime")) Prefs.setCurfewTime(ctx, o.getString("curfewTime"))
+            if (o.has("notifMorning")) Prefs.setNotifMorning(ctx, o.getBoolean("notifMorning"))
+            if (o.has("morningTime")) Prefs.setMorningTime(ctx, o.getString("morningTime"))
+            if (o.has("sleepBlock")) Prefs.setSleepBlockEnabled(ctx, o.getBoolean("sleepBlock"))
+            if (o.has("blockStart")) Prefs.setSleepBlockStart(ctx, o.getString("blockStart"))
+            if (o.has("blockEnd")) Prefs.setSleepBlockEnd(ctx, o.getString("blockEnd"))
+            if (o.has("sleepGrayscale")) Prefs.setSleepGrayscale(ctx, o.getBoolean("sleepGrayscale"))
+            Reminders.scheduleAll(ctx)
+            ShieldService.sync(ctx)
+        } catch (e: Exception) { /* invalid JSON */ }
+    }
+
+    @JavascriptInterface
+    fun isSleepBlockActive(): Boolean = Prefs.isSleepBlockActiveNow(ctx)
 
     @JavascriptInterface
     fun openShieldNotificationSettings() {

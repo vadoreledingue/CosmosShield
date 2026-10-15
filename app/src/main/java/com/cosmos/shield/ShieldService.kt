@@ -101,16 +101,32 @@ class ShieldService : Service() {
 
         updateForeground()
         val app = fg?.let { cfg[it] }
+
+        val isSleepBlock = Prefs.isSleepBlockActiveNow(this)
+        val isSleepGray = isSleepBlock && Prefs.sleepGrayscale(this)
+
         if (app == null) {
-            GrayscaleOverlay.hide(this)
+            if (isSleepGray) {
+                GrayscaleOverlay.show(this, Prefs.grayscaleIntensity(this))
+            } else {
+                GrayscaleOverlay.hide(this)
+            }
             return
         }
-        if (app.grayscale) GrayscaleOverlay.show(this, Prefs.grayscaleIntensity(this)) else GrayscaleOverlay.hide(this)
+
+        if (app.grayscale || isSleepGray) {
+            GrayscaleOverlay.show(this, Prefs.grayscaleIntensity(this))
+        } else {
+            GrayscaleOverlay.hide(this)
+        }
 
         val now = System.currentTimeMillis()
-        if (app.breathGate && !Prefs.sessionActive(this, app.pkg) && now - lastGate > 2500) {
+        val sessionAllowed = !isSleepBlock && Prefs.sessionActive(this, app.pkg)
+        if (app.breathGate && !sessionAllowed && now - lastGate > 2500) {
             lastGate = now
-            Prefs.endSession(this, app.pkg)
+            if (isSleepBlock) {
+                Prefs.endSession(this, app.pkg)
+            }
             launchGate(app.pkg)
         }
     }

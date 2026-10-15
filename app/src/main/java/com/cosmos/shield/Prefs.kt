@@ -74,5 +74,50 @@ object Prefs {
     fun setNotifMorning(c: Context, v: Boolean) { sp(c).edit().putBoolean("notif_morning", v).apply() }
     fun notifShield(c: Context): Boolean = sp(c).getBoolean("notif_shield", true)
     fun setNotifShield(c: Context, v: Boolean) { sp(c).edit().putBoolean("notif_shield", v).apply() }
+
+    // Sleep & Curfew hours settings
+    fun curfewTime(c: Context): String = sp(c).getString("curfew_time", "22:00") ?: "22:00"
+    fun setCurfewTime(c: Context, v: String) { sp(c).edit().putString("curfew_time", v).apply() }
+    fun morningTime(c: Context): String = sp(c).getString("morning_time", "08:00") ?: "08:00"
+    fun setMorningTime(c: Context, v: String) { sp(c).edit().putString("morning_time", v).apply() }
+
+    // Sleep block (night app lockdown)
+    fun sleepBlockEnabled(c: Context): Boolean = sp(c).getBoolean("sleep_block_enabled", true)
+    fun setSleepBlockEnabled(c: Context, v: Boolean) { sp(c).edit().putBoolean("sleep_block_enabled", v).apply() }
+    fun sleepBlockStart(c: Context): String = sp(c).getString("sleep_block_start", "22:00") ?: "22:00"
+    fun setSleepBlockStart(c: Context, v: String) { sp(c).edit().putString("sleep_block_start", v).apply() }
+    fun sleepBlockEnd(c: Context): String = sp(c).getString("sleep_block_end", "08:00") ?: "08:00"
+    fun setSleepBlockEnd(c: Context, v: String) { sp(c).edit().putString("sleep_block_end", v).apply() }
+    fun sleepGrayscale(c: Context): Boolean = sp(c).getBoolean("sleep_grayscale", true)
+    fun setSleepGrayscale(c: Context, v: Boolean) { sp(c).edit().putBoolean("sleep_grayscale", v).apply() }
+
+    fun parseTime(time: String, defH: Int, defM: Int): Pair<Int, Int> {
+        val parts = time.split(":")
+        if (parts.size >= 2) {
+            val h = parts[0].toIntOrNull() ?: defH
+            val m = parts[1].toIntOrNull() ?: defM
+            return Pair(h.coerceIn(0, 23), m.coerceIn(0, 59))
+        }
+        return Pair(defH, defM)
+    }
+
+    fun isTimeInRange(curH: Int, curM: Int, startStr: String, endStr: String): Boolean {
+        val (sh, sm) = parseTime(startStr, 22, 0)
+        val (eh, em) = parseTime(endStr, 8, 0)
+        val cur = curH * 60 + curM
+        val start = sh * 60 + sm
+        val end = eh * 60 + em
+        return if (start <= end) {
+            cur in start until end
+        } else {
+            cur >= start || cur < end
+        }
+    }
+
+    fun isSleepBlockActiveNow(c: Context): Boolean {
+        if (!sleepBlockEnabled(c)) return false
+        val cal = java.util.Calendar.getInstance()
+        return isTimeInRange(cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE), sleepBlockStart(c), sleepBlockEnd(c))
+    }
 }
 
