@@ -22,7 +22,14 @@ object Reminders {
     }
 
     fun schedule(c: Context, type: String) {
-        val (h, m) = if (type == NIGHT) Pair(21, 30) else Pair(8, 0)
+        // Respect per-notification settings
+        if (type == NIGHT && !Prefs.notifCurfew(c)) { cancel(c, type); return }
+        if (type == MORNING && !Prefs.notifMorning(c)) { cancel(c, type); return }
+        val (h, m) = if (type == NIGHT) {
+            Prefs.parseTime(Prefs.curfewTime(c), 22, 0)
+        } else {
+            Prefs.parseTime(Prefs.morningTime(c), 8, 0)
+        }
         val cal = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, h); set(Calendar.MINUTE, m); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
             if (timeInMillis <= System.currentTimeMillis() + 1000) add(Calendar.DAY_OF_YEAR, 1)
@@ -30,6 +37,11 @@ object Reminders {
         val am = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         // Alarme inexacte (pas de permission spéciale) : peut dériver de quelques minutes en mode Doze.
         am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, cal.timeInMillis, alarmIntent(c, type))
+    }
+
+    fun cancel(c: Context, type: String) {
+        val am = c.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        am.cancel(alarmIntent(c, type))
     }
 
     private fun alarmIntent(c: Context, type: String): PendingIntent =
@@ -51,7 +63,13 @@ object Reminders {
             c, if (type == NIGHT) 200 else 201, open,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val title = if (type == NIGHT) "🌙 21h30 — Couvre-feu digital" else "☀️ Bilan du matin"
+        val (h, m) = if (type == NIGHT) {
+            Prefs.parseTime(Prefs.curfewTime(c), 22, 0)
+        } else {
+            Prefs.parseTime(Prefs.morningTime(c), 8, 0)
+        }
+        val timeFmt = String.format("%02dh%02d", h, m)
+        val title = if (type == NIGHT) "🌙 $timeFmt — Couvre-feu digital" else "☀️ $timeFmt — Bilan du matin"
         val text = if (type == NIGHT) "Pose ton téléphone, passe en mode nuit et prends ton livre avant de dormir."
                    else "Note ton sommeil et valide ta journée d'hier."
         val n = Notification.Builder(c, CHANNEL)

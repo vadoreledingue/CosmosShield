@@ -160,6 +160,7 @@ class MainActivity : Activity() {
             path.endsWith(".woff2") -> "font/woff2"
             path.endsWith(".json") -> "application/json"
             path.endsWith(".svg") -> "image/svg+xml"
+            path.endsWith(".png") -> "image/png"
             else -> URLConnection.guessContentTypeFromName(path) ?: "application/octet-stream"
         }
     }

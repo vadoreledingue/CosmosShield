@@ -1,11 +1,13 @@
 package com.cosmos.shield
 
+import android.app.AppOpsManager
 import android.app.NotificationManager
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.webkit.JavascriptInterface
@@ -21,12 +23,26 @@ class NativeBridge(private val act: MainActivity) {
     @Volatile var pendingOpen: String? = null
 
     @JavascriptInterface
+    fun isRestrictedSettingsActive(): Boolean {
+        if (Build.VERSION.SDK_INT < 33) return false
+        return try {
+            val appOps = ctx.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+            val mode = appOps.unsafeCheckOpNoThrow(
+                "android:access_restricted_settings",
+                android.os.Process.myUid(),
+                ctx.packageName
+            )
+            mode != AppOpsManager.MODE_ALLOWED
+        } catch (e: Exception) { false }
+    }
+
+    @JavascriptInterface
     fun getPermissions(): String = JSONObject().apply {
         put("usage", Usage.hasAccess(ctx))
         put("overlay", Settings.canDrawOverlays(ctx))
         put("notif", ctx.getSystemService(NotificationManager::class.java).areNotificationsEnabled())
         put("battery", ctx.getSystemService(PowerManager::class.java).isIgnoringBatteryOptimizations(ctx.packageName))
-        put("secure", Grayscale.canWrite(ctx))
+        put("restricted", isRestrictedSettingsActive())
     }.toString()
 
     @JavascriptInterface
@@ -36,6 +52,12 @@ class NativeBridge(private val act: MainActivity) {
             "usage" -> Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS, pkg)
             "overlay" -> Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, pkg)
             "battery" -> Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+            "restricted" -> {
+                act.runOnUiThread {
+                    Toast.makeText(ctx, "Appuyez sur les 3 points (⋮) en haut à droite > Autoriser les paramètres restreints", Toast.LENGTH_LONG).show()
+                }
+                Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg)
+            }
             else -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, pkg)
         }
         if (start(intent)) return
@@ -133,10 +155,87 @@ class NativeBridge(private val act: MainActivity) {
     }
 
     @JavascriptInterface
-    fun restoreColors() { Grayscale.forceOff(ctx) }
+    fun restoreColors() { GrayscaleOverlay.hide(ctx) }
 
     @JavascriptInterface
     fun toast(msg: String) {
         act.runOnUiThread { Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show() }
+    }
+
+    @JavascriptInterface
+    fun getGrayscaleIntensity(): String = Prefs.grayscaleIntensity(ctx).toString()
+
+    @JavascriptInterface
+    fun setGrayscaleIntensity(intensity: Int) {
+        Prefs.setGrayscaleIntensity(ctx, intensity)
+    }
+
+    @JavascriptInterface
+    fun getNotifSettings(): String = JSONObject().apply {
+        put("curfew", Prefs.notifCurfew(ctx))
+        put("morning", Prefs.notifMorning(ctx))
+        put("shield", Prefs.notifShield(ctx))
+        put("curfewTime", Prefs.curfewTime(ctx))
+        put("morningTime", Prefs.morningTime(ctx))
+    }.toString()
+
+    @JavascriptInterface
+    fun setNotifSettings(json: String) {
+        try {
+            val o = JSONObject(json)
+            if (o.has("curfew")) Prefs.setNotifCurfew(ctx, o.getBoolean("curfew"))
+            if (o.has("morning")) Prefs.setNotifMorning(ctx, o.getBoolean("morning"))
+            if (o.has("curfewTime")) Prefs.setCurfewTime(ctx, o.getString("curfewTime"))
+            if (o.has("morningTime")) Prefs.setMorningTime(ctx, o.getString("morningTime"))
+            if (o.has("shield")) {
+                Prefs.setNotifShield(ctx, o.getBoolean("shield"))
+                ShieldService.updateNotification(ctx)
+            }
+            Reminders.scheduleAll(ctx)
+        } catch (e: Exception) { /* invalid JSON */ }
+    }
+
+    @JavascriptInterface
+    fun getSleepSettings(): String = JSONObject().apply {
+        put("notifCurfew", Prefs.notifCurfew(ctx))
+        put("curfewTime", Prefs.curfewTime(ctx))
+        put("notifMorning", Prefs.notifMorning(ctx))
+        put("morningTime", Prefs.morningTime(ctx))
+        put("sleepBlock", Prefs.sleepBlockEnabled(ctx))
+        put("blockStart", Prefs.sleepBlockStart(ctx))
+        put("blockEnd", Prefs.sleepBlockEnd(ctx))
+        put("sleepGrayscale", Prefs.sleepGrayscale(ctx))
+        put("isBlockActiveNow", Prefs.isSleepBlockActiveNow(ctx))
+    }.toString()
+
+    @JavascriptInterface
+    fun setSleepSettings(json: String) {
+        try {
+            val o = JSONObject(json)
+            if (o.has("notifCurfew")) Prefs.setNotifCurfew(ctx, o.getBoolean("notifCurfew"))
+            if (o.has("curfewTime")) Prefs.setCurfewTime(ctx, o.getString("curfewTime"))
+            if (o.has("notifMorning")) Prefs.setNotifMorning(ctx, o.getBoolean("notifMorning"))
+            if (o.has("morningTime")) Prefs.setMorningTime(ctx, o.getString("morningTime"))
+            if (o.has("sleepBlock")) Prefs.setSleepBlockEnabled(ctx, o.getBoolean("sleepBlock"))
+            if (o.has("blockStart")) Prefs.setSleepBlockStart(ctx, o.getString("blockStart"))
+            if (o.has("blockEnd")) Prefs.setSleepBlockEnd(ctx, o.getString("blockEnd"))
+            if (o.has("sleepGrayscale")) Prefs.setSleepGrayscale(ctx, o.getBoolean("sleepGrayscale"))
+            Reminders.scheduleAll(ctx)
+            ShieldService.sync(ctx)
+        } catch (e: Exception) { /* invalid JSON */ }
+    }
+
+    @JavascriptInterface
+    fun isSleepBlockActive(): Boolean = Prefs.isSleepBlockActiveNow(ctx)
+
+    @JavascriptInterface
+    fun openShieldNotificationSettings() {
+        val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName)
+            putExtra(Settings.EXTRA_CHANNEL_ID, ShieldService.CHANNEL)
+        }
+        if (!start(intent)) {
+            start(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, ctx.packageName))
+        }
     }
 }
